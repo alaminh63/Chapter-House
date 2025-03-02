@@ -1,9 +1,12 @@
- 
-export default function App() {
+import MainLayout from './components/layout/MainLayout';
+import ProtectedRoute from './components/layout/ProtectedRoute';
+
+function App() {
   return (
-    <div>
-      <h1>hello</h1>
-    </div>
-  )
+    <ProtectedRoute role={undefined}>
+      <MainLayout />
+    </ProtectedRoute>
+  );
 }
- 
+
+export default App;

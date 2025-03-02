@@ -1,37 +1,26 @@
-import { Server } from 'http';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-console */
+/* eslint-disable no-undef */
 import mongoose from 'mongoose';
 import app from './app';
-import seedSuperAdmin from './app/DB';
-import config from './app/config';
+import config from './app/config/index';
 
-let server: Server;
-
-async function main() {
+// const DB = config.database_url?.replace(
+//   '<db_password>',
+//   config.database_password as string
+// );
+const DB = config.database_url;
+const connectDB = async () => {
   try {
-    await mongoose.connect(config.database_url as string);
+    await mongoose.connect(DB as string);
 
-
-    server = app.listen(config.port, () => {
-      console.log(`app is listening on port ${config.port}`);
+    app.listen(config.port, () => {
+      console.log(`App is running on PORT 🏃‍♂️‍➡️ ❤️ ${config.port}`);
     });
-  } catch (err) {
-    console.log(err);
+  } catch (err: any) {
+    console.error(`Erorr: ${err.message}`);
+    process.exit(1);
   }
-}
+};
 
-main();
-
-process.on('unhandledRejection', (err) => {
-  console.log(`😈 unahandledRejection is detected , shutting down ...`, err);
-  if (server) {
-    server.close(() => {
-      process.exit(1);
-    });
-  }
-  process.exit(1);
-});
-
-process.on('uncaughtException', () => {
-  console.log(`😈 uncaughtException is detected , shutting down ...`);
-  process.exit(1);
-});
+connectDB();

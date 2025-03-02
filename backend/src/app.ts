@@ -1,27 +1,39 @@
-/* eslint-disable no-undef */
-/* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import cookieParser from 'cookie-parser';
-import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
-import globalErrorHandler from './app/middlewares/globalErrorhandler';
+
+import cors from 'cors';
+
+import router from './routes';
+import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import notFound from './app/middlewares/notFound';
-import router from './app/routes';
 
 const app: Application = express();
 
-//parsers
+// CORS
+//SHOULD HAVE TO CHANGE THE ORIGIN WHEN PRODUCTION!
+app.use(
+  cors({
+    origin: ['http://localhost:5173'],
+    credentials: true,
+  }),
+);
+
+// 3rd PARTY MIDDLEWARE
+
+
+// BODY PARSER
 app.use(express.json());
-app.use(cookieParser());
 
-app.use(cors({ origin: ['http://localhost:5173'], credentials: true }));
-
+// ROUTER
 app.use('/api/v1', router);
 
+// HELLO RESPONSE
+app.get('/', (req: Request, res: Response) => {
+  res.status(200).json({ message: 'Hello World! 👋' });
+});
+
+// GLOBAL ERROR HANDLER
 app.use(globalErrorHandler);
 
-//Not Found
+// NOT FOUND
 app.use(notFound);
-
 export default app;
