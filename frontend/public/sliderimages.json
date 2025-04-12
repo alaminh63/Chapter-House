@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "image": "https://i.ibb.co/fCmfDPM/tailwind.jpg"
+  },
+  {
+    "id": 2,
+    "image": "https://i.ibb.co/R6JJ1pQ/daisyui.png"
+  },
+  {
+    "id": 3,
+    "image": "https://i.ibb.co/1nTK2zm/java.jpg"
+  },
+  {
+    "id": 4,
+    "image": "https://i.ibb.co/qxJdQ30/React.jpg"
+  },
+  {
+    "id": 5,
+    "image": "https://i.ibb.co/9qCTFg8/JS.jpg"
+  },
+  {
+    "id": 6,
+    "image": "https://i.ibb.co/sH02c5Z/cpp.jpg"
+  }
+]

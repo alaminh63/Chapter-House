@@ -4,14 +4,11 @@ export interface IBook {
   _id: Types.ObjectId;
   title: string;
   author: Types.ObjectId;
-  category: 'Sedan' | 'SUV' | 'Truck' | 'Coupe' | 'Convertible';
+  category: 'Fiction' | 'Non-Fiction' | 'Science' | 'Biography' | 'History';
   price: number;
   available: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
-  isDeleted?: boolean;
   img?: string;
   description: string;
   quantity: number;
-  model: string;
+  isDeleted?: boolean;
 }

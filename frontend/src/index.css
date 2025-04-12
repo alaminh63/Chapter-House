@@ -1,5 +1,13 @@
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: rgba(255, 255, 255, 0.87);
+  /* background-color: #242424; */
+  background: linear-gradient(to bottom right, #1f2937, #111827, #000000);
+}
+.removeDefaultIcon::-webkit-inner-spin-button,
+.removeDefaultIcon::-webkit-outer-spin-button {
+  -webkit-appearance: none;
 }

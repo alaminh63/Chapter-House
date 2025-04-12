@@ -1,0 +1,50 @@
+[
+  {
+    "id": "1",
+    "image": "https://i.ibb.co/Z66m4s1/Brand-1-150x150.webp",
+    "desc": "Absolutely fantastic experience! The collection of books is impressive and the service is exceptional. I always find something new and exciting to read. Highly recommend!",
+    "name": "Andre da Silva",
+    "position": "Director",
+    "rating": 5
+  },
+  {
+    "id": "2",
+    "image": "https://i.ibb.co/Z66m4s1/Brand-1-150x150.webp",
+    "desc": "An excellent selection of books with great customer service. The staff is always helpful and knowledgeable. It's my go-to place for all my reading needs!",
+    "name": "Iasmin Garcia",
+    "position": "Director",
+    "rating": 5
+  },
+  {
+    "id": "3",
+    "image": "https://i.ibb.co/H2bx8KP/JPEG-20210320-203703-5456959541357686078-150x150.webp",
+    "desc": "I love shopping here! The store has a wide variety of genres, and I can always find something that suits my taste. The online ordering is quick and easy too!",
+    "name": "Momarmergan",
+    "position": "Director",
+    "rating": 5
+  },
+  {
+    "id": "4",
+    "image": "https://i.ibb.co/xsV2S00/Brand-3-150x150.webp",
+    "desc": "Such a delightful bookshop! The atmosphere is cozy, and the staff always gives great recommendations. It's my favorite place to relax and discover new books.",
+    "name": "kalanabandara",
+    "position": "Managing Director",
+    "rating": 5
+  },
+  {
+    "id": "5",
+    "image": "https://i.ibb.co/z74CwmY/ZS-150x150.webp",
+    "desc": "A wonderful experience! The store has everything from bestsellers to hidden gems. The service is top-notch, and I always leave with a smile.",
+    "name": "moussadiagne20",
+    "position": "Director",
+    "rating": 5
+  },
+  {
+    "id": "6",
+    "image": "https://i.ibb.co/5BZM3hS/67a8a5ef-fc8e-4a99-93d8-e1cbf998a2f7-1.webp",
+    "desc": "If you're a book lover, this shop is a must-visit! The books are well-curated, and the team makes you feel like part of the community. Will definitely be coming back!",
+    "name": "Dechelle Knox",
+    "position": "Ceo/Founder",
+    "rating": 5
+  }
+]

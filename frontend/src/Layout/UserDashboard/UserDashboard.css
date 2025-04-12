@@ -1,0 +1,7 @@
+.dashboardLink {
+  padding: 10px 20px !important;
+}
+.dashboardLink:hover {
+  background-color: #272c33;
+  border-radius: 8px;
+}

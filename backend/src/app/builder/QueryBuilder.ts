@@ -1,6 +1,6 @@
-import { FilterQuery, Query } from 'mongoose';
+import { FilterQuery, Query, Document } from 'mongoose';
 
-class QueryBuilder<T> {
+class QueryBuilder<T extends Document> {
   public modelQuery: Query<T[], T>;
   public query: Record<string, unknown>;
 
@@ -10,57 +10,72 @@ class QueryBuilder<T> {
   }
 
   search(searchableFields: string[]) {
-    const searchTerm = this?.query?.searchTerm;
+    const searchTerm = this?.query?.searchTerm as string;
     if (searchTerm) {
       this.modelQuery = this.modelQuery.find({
         $or: searchableFields.map(
           (field) =>
             ({
               [field]: { $regex: searchTerm, $options: 'i' },
-            } as FilterQuery<T>)
+            }) as FilterQuery<T>,
         ),
       });
     }
-
     return this;
   }
 
   filter() {
-    const queryObj = { ...this.query };
+    const queryObj: Record<string, unknown> = { ...this.query };
 
-    const inStockValue = queryObj.inStock;
-    if (typeof inStockValue === 'string') {
-      if (inStockValue.toLowerCase() === 'true') {
+    // Convert inStock to boolean if it's a string
+    if (typeof queryObj.inStock === 'string') {
+      if (queryObj.inStock.toLowerCase() === 'true') {
         queryObj.inStock = true;
-      } else if (inStockValue.toLowerCase() === 'false') {
+      } else if (queryObj.inStock.toLowerCase() === 'false') {
         queryObj.inStock = false;
       } else {
         delete queryObj.inStock; // Remove invalid boolean values
       }
     }
 
-    // Filtering
-    const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
-
+    const excludeFields = [
+      'searchTerm',
+      'sort',
+      'limit',
+      'page',
+      'fields',
+      'minPrice',
+      'maxPrice',
+    ];
     excludeFields.forEach((el) => delete queryObj[el]);
 
-    let queryStr = JSON.stringify(queryObj);
+    const filters: FilterQuery<T> = {}; // Explicitly type 'filters'
 
-    // ADVANCED FILTERING
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    for (const key in queryObj) {
+      if (queryObj.hasOwnProperty(key)) {
+        filters[key] = queryObj[key] as any; // Add other filters
+      }
+    }
 
-    this.modelQuery = this.modelQuery.find(
-      JSON.parse(queryStr) as FilterQuery<T>
-    );
+    // Price range filtering
+    const minPrice = this.query.minPrice as string;
+    const maxPrice = this.query.maxPrice as string;
 
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      filters['price'] = {
+        ...(minPrice !== undefined && { $gte: Number(minPrice) }),
+        ...(maxPrice !== undefined && { $lte: Number(maxPrice) }),
+      } as any;
+    }
+
+    this.modelQuery = this.modelQuery.find(filters);
     return this;
   }
 
   sort() {
     const sort =
       (this?.query?.sort as string)?.split(',')?.join(' ') || '-createdAt';
-    this.modelQuery = this.modelQuery.sort(sort as string);
-
+    this.modelQuery = this.modelQuery.sort(sort);
     return this;
   }
 
@@ -68,21 +83,20 @@ class QueryBuilder<T> {
     const page = Number(this?.query?.page) || 1;
     const limit = Number(this?.query?.limit) || 10;
     const skip = (page - 1) * limit;
-
     this.modelQuery = this.modelQuery.skip(skip).limit(limit);
-
     return this;
   }
 
   fields() {
     const fields =
       (this?.query?.fields as string)?.split(',')?.join(' ') || '-__v';
-
     this.modelQuery = this.modelQuery.select(fields);
     return this;
   }
+
   async countTotal() {
     const totalQueries = this.modelQuery.getFilter();
+    // Use Book.countDocuments instead of this.modelQuery.model.countDocuments
     const total = await this.modelQuery.model.countDocuments(totalQueries);
     const page = Number(this?.query?.page) || 1;
     const limit = Number(this?.query?.limit) || 10;

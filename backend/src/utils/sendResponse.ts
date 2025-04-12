@@ -16,6 +16,7 @@ type TResponse<T> = {
 };
 
 const sendResponse = <T>(res: Response, data: TResponse<T>) => {
+  console.log(`Sending response: ${JSON.stringify(data)}`);
   res.status(data.statusCode).json({
     success: data.success,
     statusCode: data.statusCode,

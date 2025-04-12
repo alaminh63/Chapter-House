@@ -1,0 +1,56 @@
+/* Custom Fade-In Animation */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom Bounce Animation for the spinner */
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Custom Spinner Animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Applying the custom fadeIn to elements */
+.fade-in {
+  animation: fadeIn 1s ease-out forwards;
+}
+
+/* Applying the custom bounceIn to elements */
+.bounce-in {
+  animation: bounceIn 1s ease-out forwards;
+}
+
+/* Applying the custom spin animation to the spinner (infinite) */
+.spinner {
+  animation: spin 1.5s linear infinite;
+}
+
+/* Optional: If you want the fade-in to repeat infinitely (for example, for text or title) */
+.fade-in-infinite {
+  animation: fadeIn 1s ease-out infinite;
+}

@@ -4,9 +4,11 @@ import catchAsync from '../../../utils/catchAsync';
 import sendResponse from '../../../utils/sendResponse';
 
 const getAllBooks = catchAsync(async (req: Request, res: Response) => {
+  
   const { query } = req;
 
   const result = await bookServices.getAllBooksFromDB(query);
+ 
 
   sendResponse(res, {
     statusCode: 200,
