@@ -1,26 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-console */
-/* eslint-disable no-undef */
-import mongoose from 'mongoose';
-import app from './app';
-import config from './app/config/index';
+import app from "./app";
+import config from "./app/config";
+import mongoose from "mongoose";
 
-// const DB = config.database_url?.replace(
-//   '<db_password>',
-//   config.database_password as string
-// );
-const DB = config.database_url;
-const connectDB = async () => {
+async function main() {
   try {
-    await mongoose.connect(DB as string);
+    await mongoose.connect(config.database_url as string);
 
     app.listen(config.port, () => {
-      console.log(`App is running on PORT 🏃‍♂️‍➡️ ❤️ ${config.port}`);
+      console.log(`Example app listening on port ${config.port}`);
     });
-  } catch (err: any) {
-    console.error(`Erorr: ${err.message}`);
-    process.exit(1);
+  } catch (error) {
+    console.log("Error in sever: ", error);
   }
-};
+}
 
-connectDB();
+main();

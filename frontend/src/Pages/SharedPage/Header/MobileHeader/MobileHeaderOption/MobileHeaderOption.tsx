@@ -4,81 +4,57 @@ import { useAppSelector } from "../../../../../Redux/hooks";
 import DashboardCart from "../../DesktopHeader/DashboardCart";
 import DashboradButton from "../../DesktopHeader/DashboradButton";
 import { logout } from "../../../../../Redux/api/features/auth/authSlice";
-
-const MobileHeaderOption = ({ handleClick }) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const MobileHeaderOption = ({ handleClick }: any) => {
   const { token } = useAppSelector((state) => state.auth);
   const dispatch = useDispatch();
-
   return (
-    <div className="py-6 px-8 flex flex-col gap-6">
-      {/* Navigation Links (Styled) */}
-      <nav className="flex flex-col space-y-4">
+    <div className="bg-gradient-to-r from-purple-700 via-indigo-800 to-purple-900 text-white flex flex-col gap-4 px-5 py-5 relative z-10">
+      <div className="flex flex-col gap-4 font-bold w-full ">
         <NavLink
+          className={({ isActive }) => (isActive ? "text-blue-500" : "acLk ")}
           to="/home"
-          onClick={handleClick}
-          className={({ isActive }) =>
-            `block py-3 px-5 rounded-xl transition-colors duration-200 ${
-              isActive
-                ? "bg-indigo-700 text-white" // Active link
-                : "hover:bg-gray-700 text-gray-300"
-            }`
-          }
+          onClick={() => handleClick(false)}
         >
           Home
         </NavLink>
+
         <NavLink
+          className={({ isActive }) => (isActive ? "text-blue-500" : "acLk ")}
           to="/all-books"
-          onClick={handleClick}
-          className={({ isActive }) =>
-            `block py-3 px-5 rounded-xl transition-colors duration-200 ${
-              isActive
-                ? "bg-indigo-700 text-white" // Active link
-                : "hover:bg-gray-700 text-gray-300"
-            }`
-          }
+          onClick={() => handleClick(false)}
         >
-          All Books
+          All Book
         </NavLink>
+
         <NavLink
+          className={({ isActive }) => (isActive ? "text-blue-500" : "acLk ")}
           to="/about-us"
-          onClick={handleClick}
-          className={({ isActive }) =>
-            `block py-3 px-5 rounded-xl transition-colors duration-200 ${
-              isActive
-                ? "bg-indigo-700 text-white" // Active link
-                : "hover:bg-gray-700 text-gray-300"
-            }`
-          }
+          onClick={() => handleClick(false)}
         >
           About Us
         </NavLink>
-      </nav>
 
-      {/* Authentication Area (Styled) */}
-      <div className="border-t border-gray-700 pt-6">
-        {token ? (
-          <div className="flex flex-col items-center space-y-4">
-            <div className="flex items-center space-x-4">
-              <DashboardCart />
-              <DashboradButton />
+        <div className="w-full  flex justify-start items-center 0">
+          {token ? (
+            <div className=" flex flex-col items-start gap-x-3">
+              <div className="flex flex-row-reverse items-center">
+                <DashboardCart />
+                <DashboradButton />
+              </div>
+              <button
+                className=" btn btn-error text-white mt-3"
+                onClick={() => dispatch(logout())}
+              >
+                Logout
+              </button>
             </div>
-            <button
-              className="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-xl transition-colors duration-200"
-              onClick={() => {
-                dispatch(logout());
-                handleClick(); // Close menu on logout
-              }}
-            >
-              Logout
-            </button>
-          </div>
-        ) : (
-          <Link to="/login" className="w-full">
-            <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-xl transition-colors duration-200">
-              Login
-            </button>
-          </Link>
-        )}
+          ) : (
+            <Link to={"/login"}>
+              <button className=" btn btn-primary text-white ">Login</button>
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );

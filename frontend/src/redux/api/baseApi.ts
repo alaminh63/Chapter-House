@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { sonarId } from "../../utils/Fucntion/sonarId";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:5000/api/v1",
+  baseUrl: "http://localhost:5000/api",
   // baseUrl: "https://book-shop-server-blue.vercel.app/api",
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
