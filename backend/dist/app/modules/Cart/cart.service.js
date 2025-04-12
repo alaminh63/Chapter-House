@@ -15,33 +15,32 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.cartServices = void 0;
 const AppError_1 = __importDefault(require("../../errors/AppError"));
 const cart_model_1 = require("./cart.model");
-//Insert Cart
-const createCartDB = (carttData) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("Cart Data: ", carttData);
-    const result = yield cart_model_1.CartModel.create(carttData);
+// Add a new item to the cart in the database
+const addItemToCartDB = (cartItemData) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield cart_model_1.CartModel.create(cartItemData);
     return result;
 });
-// Get all Cart
-const getAllCartFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield cart_model_1.CartModel.find({ userId: id }).populate("bookId");
+// Retrieve all cart items for a specific user from the database
+const getCartItemsFromDB = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield cart_model_1.CartModel.find({ userId: userId }).populate("bookId");
     return result;
 });
-//delete Cart
-const deleteCartFromDB = (cartId, loggedUserId) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
-    ///Check user right or wrong
-    const prvCheck = yield cart_model_1.CartModel.findById({ _id: cartId });
-    if (((_a = prvCheck === null || prvCheck === void 0 ? void 0 : prvCheck.userId) === null || _a === void 0 ? void 0 : _a.toString()) !== loggedUserId) {
-        console.log("Cart ref id--------: ", (_b = prvCheck === null || prvCheck === void 0 ? void 0 : prvCheck.userId) === null || _b === void 0 ? void 0 : _b.toString());
-        console.log("logged user id------: ", loggedUserId);
-        throw new AppError_1.default(401, "You are not authorized");
+// Remove a specific item from the cart in the database
+const removeItemFromCartDB = (cartItemId, userAuthId) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    // Validate user authorization before deletion
+    const cartItem = yield cart_model_1.CartModel.findById(cartItemId);
+    if (!cartItem) {
+        throw new AppError_1.default(404, "Cart item not found");
     }
-    //main work
-    const result = yield cart_model_1.CartModel.findByIdAndDelete({ _id: cartId });
+    if (((_a = cartItem === null || cartItem === void 0 ? void 0 : cartItem.userId) === null || _a === void 0 ? void 0 : _a.toString()) !== userAuthId) {
+        throw new AppError_1.default(403, "Forbidden: You are not authorized to remove this item");
+    }
+    const result = yield cart_model_1.CartModel.findByIdAndDelete({ _id: cartItemId });
     return result;
 });
 exports.cartServices = {
-    createCartDB,
-    getAllCartFromDB,
-    deleteCartFromDB,
+    createCartDB: addItemToCartDB, //Aliased
+    getAllCartFromDB: getCartItemsFromDB, //Aliased
+    deleteCartFromDB: removeItemFromCartDB, //Aliased
 };

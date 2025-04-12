@@ -4,89 +4,98 @@ import { TUser } from "./user.interface";
 import { userModel } from "./user.model";
 import config from "../../config";
 
-interface IPassword {
-  oldPassword: string;
-  newPassword: string;
+interface PasswordUpdateData {
+  oldPasswordInput: string;
+  newPasswordInput: string;
 }
 
-///Create User into db
-const registerUserIntoDB = async (payload: TUser) => {
-  console.log("User Payload: ", payload);
-  const email = payload?.email;
-  const res = await userModel.findOne({ email: email });
-  console.log(" res: ", res);
-  if (res) {
-    throw new AppError(409, "This Email Allready Exists");
+// Registers a new user in the database
+const createUserInDB = async (userData: TUser) => {
+  const existingUser = await userModel.findOne({ email: userData.email });
+  if (existingUser) {
+    throw new AppError(409, "Email address is already registered");
   }
-  const result = await userModel.create(payload);
-  return result;
+
+  const createdUser = await userModel.create(userData);
+  return createdUser;
 };
 
-//Get All User from DB
-const getAllUser = async () => {
-  const result = await userModel.find();
-  return result;
+// Retrieves all users from the database
+const retrieveAllUsers = async () => {
+  const users = await userModel.find();
+  return users;
 };
 
-//deletel User from DB
-const deleteUser = async (id: string) => {
+// Deletes a user from the database based on their ID
+const removeUserFromDB = async (userId: string) => {
   try {
-    const result = await userModel.findOneAndDelete({ _id: id });
-    return result;
+    const deletionResult = await userModel.findOneAndDelete({ _id: userId });
+    if (!deletionResult) {
+      throw new Error("User not found"); // Ensures the custom error message is used
+    }
+    return deletionResult;
   } catch (error) {
-    throw new Error("USer Not Found");
+    throw new AppError(404, "User not found"); // Changed to AppError
   }
 };
 
-//Update Password
-const updatePasswordIntoDB = async (userId: string, payload: IPassword) => {
-  const { oldPassword, newPassword } = payload;
-  console.log("User Id: ", userId);
-  console.log("Old Password ", oldPassword);
-  console.log("New  Password ", newPassword);
+// Updates a user's password in the database
+const changePasswordInDB = async (
+  userId: string,
+  passwordData: PasswordUpdateData
+) => {
+  const { oldPasswordInput, newPasswordInput } = passwordData;
 
-  //Checking  if the user is exist
-  const isUserExists = await userModel.findOne({ _id: userId });
-  if (!isUserExists) {
-    throw new AppError(404, "User not Found");
+  const userRecord = await userModel.findById(userId);
+  if (!userRecord) {
+    throw new AppError(404, "User account not found");
   }
 
-  //Check Password is right or wrong
-  const isPasswordMatched = await bcrypt.compare(
-    oldPassword,
-    isUserExists?.password
+  const passwordMatch = await bcrypt.compare(
+    oldPasswordInput,
+    userRecord.password
   );
-  console.log("is Password Matched: ", isPasswordMatched);
-  if (!isPasswordMatched) {
-    throw new AppError(401, "Old password is not right");
+  if (!passwordMatch) {
+    throw new AppError(401, "Incorrect old password");
   }
 
-  const hashNewPassword = await bcrypt.hash(
-    newPassword,
+  const hashedNewPassword = await bcrypt.hash(
+    newPasswordInput,
     Number(config.bcrypt_salt_rounds)
   );
-  const result = await userModel.findByIdAndUpdate(
-    userId,
-    { password: hashNewPassword },
-    { new: true }
-  );
-  return result;
-};
-//Update User
-const updatUserIntoDB = async (userId: string, payload: TUser) => {
-  console.log("User Id in service: ", userId);
-  console.log("payload in service", payload);
 
-  const result = await userModel.findByIdAndUpdate({ _id: userId }, payload, {
-    new: true,
-  });
-  return result;
+  const updatedUser = await userModel.findByIdAndUpdate(
+    userId,
+    { password: hashedNewPassword },
+    { new: true, runValidators: true } // Ensure validation runs during update
+  );
+
+  return updatedUser;
+};
+
+// Updates a user's information in the database
+const modifyUserInDB = async (userId: string, updateData: TUser) => {
+  try {
+    const updatedUser = await userModel.findByIdAndUpdate(userId, updateData, {
+      new: true,
+      runValidators: true, // Ensure validation runs during update
+    });
+    if (!updatedUser) {
+      throw new AppError(404, "User not found for update"); // Explicitly handle the case where the user is not found
+    }
+    return updatedUser;
+  } catch (error: any) {
+    if (error.name === "ValidationError") {
+      throw new AppError(400, "Validation failed: " + error.message);
+    }
+    throw error; //re-throw for generic error handling
+  }
 };
 
 export const userServices = {
-  registerUserIntoDB,
-  getAllUser,
-  updatePasswordIntoDB,
-  deleteUser,
-  updatUserIntoDB,
+  registerUserIntoDB: createUserInDB, // aliased
+  getAllUser: retrieveAllUsers, //aliased
+  updatePasswordIntoDB: changePasswordInDB, // aliased
+  deleteUser: removeUserFromDB, // aliased
+  updatUserIntoDB: modifyUserInDB, //aliased
 };

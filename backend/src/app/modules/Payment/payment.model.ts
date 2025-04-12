@@ -1,23 +1,22 @@
-import mongoose, { Schema, Document, model } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 import { IPayment } from "./payment.interface";
 
 const PaymentSchema = new Schema<IPayment>(
   {
-    transactionId: { type: String },
-    userId: { type: Schema.Types.ObjectId, ref: "users" },
-    productId: { type: Schema.Types.ObjectId, ref: "Book" },
-
-    price: { type: Number },
-    quantity: { type: Number },
+    transactionId: { type: String, required: false },
+    userId: { type: Schema.Types.ObjectId, ref: "users", required: false },
+    productId: { type: Schema.Types.ObjectId, ref: "Book", required: false },
+    price: { type: Number, required: false },
+    quantity: { type: Number, required: false },
     paidStatus: { type: Schema.Types.Mixed, required: false },
     adminApproval: {
       type: String,
       enum: ["pending", "confirm"],
       default: "pending",
+      required: false,
     },
   },
   { timestamps: true }
 );
 
-// export default mongoose.model<PaymentDocument>("Payment", PaymentSchema);
 export const paymentModel = model<IPayment>("payments", PaymentSchema);

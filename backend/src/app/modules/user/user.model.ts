@@ -1,16 +1,14 @@
-import { Schema, model, connect } from "mongoose";
+import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
 import { TUser } from "./user.interface";
 import config from "../../config";
-import { NextFunction } from "express";
 
-const userSchema = new Schema<TUser>(
+const userSchemaDefinition = new Schema<TUser>(
   {
     name: { type: String, required: true, trim: true },
     email: {
       type: String,
       required: [true, "Email Must be required"],
-      // unique: [true, "This email already Exists"],
       lowercase: true,
       trim: true,
     },
@@ -33,30 +31,27 @@ const userSchema = new Schema<TUser>(
     },
   },
   {
-    timestamps: true, // Automatically adds createdAt and updatedAt fields
+    timestamps: true, // Timestamps for creation and update
     toJSON: {
-      transform: function (_doc, ret) {
-        // Remove sensitive or unnecessary fields
-        delete ret.password;
-        // delete ret.role;
-        // delete ret.isBlocked;
-        delete ret.createdAt;
-        delete ret.updatedAt;
-        delete ret.__v;
+      transform: function (_document, returnedObject) {
+        // Secure data transformation: exclude sensitive user details
+        delete returnedObject.password;
+        delete returnedObject.createdAt;
+        delete returnedObject.updatedAt;
+        delete returnedObject.__v;
       },
     },
   }
 );
 
-//Pre Document middleware for Bycript Password
-userSchema.pre("save", async function (next) {
+// Middleware: Hash password before saving user document
+userSchemaDefinition.pre("save", async function (next) {
   const user = this;
   user.password = await bcrypt.hash(
     user.password,
     Number(config.bcrypt_salt_rounds)
   );
   next();
-  // console.log("Now This: ", this);
 });
 
-export const userModel = model<TUser>("users", userSchema);
+export const userModel = model<TUser>("users", userSchemaDefinition);

@@ -11,28 +11,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.aboutServices = void 0;
 const about_model_1 = require("./about.model");
-///Create About into db
-const addAboutIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    //   console.log("Payload: ", payload);
-    const result = yield about_model_1.aboutModel.create(payload);
-    return result;
+// Add a new about section to the database
+const createAboutSectionInDB = (sectionData) => __awaiter(void 0, void 0, void 0, function* () {
+    const creationResult = yield about_model_1.aboutModel.create(sectionData);
+    return creationResult;
 });
-//Get All About from DB
-const getAllAbout = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield about_model_1.aboutModel.find();
-    return result;
+// Retrieve all about sections from the database
+const retrieveAllAboutSections = () => __awaiter(void 0, void 0, void 0, function* () {
+    const sections = yield about_model_1.aboutModel.find();
+    return sections;
 });
-//Update About
-const updatAboutIntoDB = (aboutId, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    //   console.log("User Id in service: ", userId);
-    //   console.log("payload in service", payload);
-    const result = yield about_model_1.aboutModel.findByIdAndUpdate({ _id: aboutId }, payload, {
+// Update an existing about section in the database
+const updateAboutSectionInDB = (sectionId, updateData) => __awaiter(void 0, void 0, void 0, function* () {
+    const updatedSection = yield about_model_1.aboutModel.findByIdAndUpdate({ _id: sectionId }, updateData, {
         new: true,
+        runValidators: true, // Ensure validators run during update
     });
-    return result;
+    return updatedSection;
 });
 exports.aboutServices = {
-    addAboutIntoDB,
-    getAllAbout,
-    updatAboutIntoDB,
+    addAboutIntoDB: createAboutSectionInDB, // Aliased
+    getAllAbout: retrieveAllAboutSections, // Aliased
+    updatAboutIntoDB: updateAboutSectionInDB, // Aliased
 };

@@ -1,64 +1,81 @@
 import AppError from "../../errors/AppError";
 import { Book } from "../book/book.model";
-import { CartModel } from "../Cart/cart.model";
-import { IPayment } from "./payment.interface";
 import { paymentModel } from "./payment.model";
 
+/**
+ * Records a payment in the database.
+ * @param finalOrder The order details to record.
+ * @param productId The ID of the product.
+ * @param quantity The quantity of the product.
+ */
 export const makePayment = async (
   finalOrder: any,
   productId: string,
   quantity: number
 ) => {
-  // Wait for the order creation
-  const result: any = await paymentModel.create(finalOrder);
+  await paymentModel.create(finalOrder);
 };
 
+/**
+ * Checks if the requested quantity of a book is available.
+ * @param productId The ID of the book.
+ * @param quantity The requested quantity.
+ * @returns True if the quantity is available, false otherwise.
+ */
 export const checkQuantityOfBook = async (
   productId: string,
   quantity: number
 ) => {
-  //Check quantity of Book
-  console.log("Come product id for check book: ", productId);
-  const targetBook = await Book.findOne({
+  console.log("Checking book quantity for product ID: ", productId);
+  const book = await Book.findOne({
     _id: productId,
   });
-  // console.log("Target Book: ", targetBook);
-  if (!targetBook) {
+
+  if (!book) {
     return false;
   }
-  if (targetBook?.quantity < quantity) {
+
+  if (book?.quantity < quantity) {
     return false;
   }
-  console.log("Target Book Quantity: ", targetBook?.quantity);
+
+  console.log("Available book quantity: ", book?.quantity);
   return true;
 };
 
+/**
+ * Updates the book quantity, removes the item from the cart, and checks if the book is in stock.
+ * @param productId The ID of the book.
+ * @param cartId The ID of the cart.
+ * @param quantity The quantity of the book.
+ */
 export const updateQuantityRemoveCartAndCheckInStock = async (
   productId: string,
   cartId: string,
   quantity: number
 ) => {
-  //inStock make false if quantity is 0
-  const targetBookAgain = await Book.findOne({
+  const bookAgain = await Book.findOne({
     _id: productId,
   });
-  if (!targetBookAgain) {
+
+  if (!bookAgain) {
     return;
   }
-  const againTargetBookQuantity = targetBookAgain?.quantity;
-  console.log("Again Target Book Quantity: ", againTargetBookQuantity);
-  if (againTargetBookQuantity == 0) {
-    const inStockRes = await Book.updateOne(
-      { _id: productId },
-      { inStock: false }
-    );
-    console.log("After in Stock false: ", inStockRes);
+
+  const currentQuantity = bookAgain?.quantity;
+  console.log("Current book quantity: ", currentQuantity);
+
+  if (currentQuantity === 0) {
+    await Book.updateOne({ _id: productId }, { inStock: false });
   }
 
   return;
 };
 
-///Get All Payment by admin
+/**
+ * Retrieves all payments from the database (Admin only).
+ * @returns An array of all payments, populated with product and user details.
+ */
 const getAllPaymentByAdminFromDB = async () => {
   const result = await paymentModel
     .find()
@@ -67,44 +84,63 @@ const getAllPaymentByAdminFromDB = async () => {
   return result;
 };
 
-// Get all Payment by User
+/**
+ * Retrieves all payments for a specific user from the database.
+ * @param id The ID of the user.
+ * @returns An array of payments for the specified user, populated with product details.
+ */
 const getSpecificPaymentFromDB = async (id: string) => {
   const result = await paymentModel.find({ userId: id }).populate("productId");
   return result;
 };
 
-// Delete Payment
+/**
+ * Deletes a payment from the database.
+ * @param id The ID of the payment to delete.
+ * @param loggedUserId The ID of the logged-in user (for authorization).
+ * @returns The result of the deletion operation.
+ * @throws AppError if the user is not authorized to delete the payment.
+ */
 const deletePaymentFromDB = async (id: string, loggedUserId: string) => {
-  ///Check user right or wrong
-  const prvCheck = await paymentModel.findById({ _id: id });
-  if (prvCheck?.userId?.toString() !== loggedUserId) {
-    console.log("Payment user id--------: ", prvCheck?.userId?.toString());
-    console.log("logged user id------: ", loggedUserId);
-    throw new AppError(401, "You are not authorized");
+  const paymentRecord = await paymentModel.findById({ _id: id });
+
+  if (paymentRecord?.userId?.toString() !== loggedUserId) {
+    console.log("Payment user ID: ", paymentRecord?.userId?.toString());
+    console.log("Logged-in user ID: ", loggedUserId);
+    throw new AppError(401, "Unauthorized to delete this payment.");
   }
 
-  //main work
   const result = await paymentModel.findByIdAndDelete({ _id: id });
   return result;
 };
 
-// Delete Payment
+/**
+ * Deletes a payment from the database by an admin.
+ * @param id The ID of the payment to delete.
+ * @param loggedUserId The ID of the logged-in admin user.
+ * @returns The result of the deletion operation.
+ */
 const deletePaymentByAdminFromDB = async (id: string, loggedUserId: string) => {
-  console.log("Delete order (admin id:)", loggedUserId);
+  console.log("Deleting order (admin ID:)", loggedUserId);
   const result = await paymentModel.findByIdAndDelete({ _id: id });
   return result;
 };
 
-//confirm payment by admin
+/**
+ * Confirms a payment and updates the book quantity.
+ * @param id The ID of the payment to confirm.
+ * @param payload The payment confirmation payload, including bookId, quantity and adminApproval status.
+ */
 const confirmPaymentFromDB = async (id: string, payload: any) => {
   const bookId = payload?.bookId;
   const quantity = payload?.quantity;
   const adminApproval = payload?.adminApproval;
 
-  console.log("AdminApproval: ", adminApproval);
-  console.log("Book id: ", bookId);
-  console.log("quantity: ", quantity);
-  const res = await paymentModel.findByIdAndUpdate(
+  console.log("Admin approval status: ", adminApproval);
+  console.log("Book ID: ", bookId);
+  console.log("Quantity: ", quantity);
+
+  const paymentUpdateResult = await paymentModel.findByIdAndUpdate(
     { _id: id },
     { adminApproval: adminApproval },
     {
@@ -112,11 +148,10 @@ const confirmPaymentFromDB = async (id: string, payload: any) => {
     }
   );
 
-  if (res?.adminApproval !== "confirm") {
+  if (paymentUpdateResult?.adminApproval !== "confirm") {
     return;
   }
 
-  ///Reduce Quantity of Book
   const targetBook = await Book.findOne({
     _id: bookId,
   });
@@ -125,15 +160,17 @@ const confirmPaymentFromDB = async (id: string, payload: any) => {
   }
   const tarGetBookQuantity = targetBook?.quantity;
   console.log("Target Book Quantity: ", tarGetBookQuantity);
-  const updateQuantitiesRes = await Book.findByIdAndUpdate(
+
+  const updatedBookResult = await Book.findByIdAndUpdate(
     { _id: bookId },
     { quantity: tarGetBookQuantity - quantity },
     {
       new: true,
     }
   );
-  console.log("After Update BOOk Quantity: ", updateQuantitiesRes);
-  if (updateQuantitiesRes?.quantity !== 0) {
+  console.log("After Update BOOk Quantity: ", updatedBookResult);
+
+  if (updatedBookResult?.quantity !== 0) {
     return;
   }
   const updateBookInStockFalseRes = await Book.findByIdAndUpdate(

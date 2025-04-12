@@ -1,73 +1,73 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { aboutServices } from "./about.service";
 
-///Add About
-const addAbout: RequestHandler = async (req, res, next) => {
+// Create About Section
+const createAboutSection: RequestHandler = async (req, res, next) => {
   try {
-    const aboutData = req.body;
-    const result = await aboutServices.addAboutIntoDB(aboutData);
+    const sectionData = req.body;
+    const creationResult = await aboutServices.addAboutIntoDB(sectionData);
 
     res.status(201).json({
       success: true,
-      message: "About Added successfully",
+      message: "About section created successfully",
       statusCode: 201,
-      data: result,
+      data: creationResult,
     });
   } catch (error: any) {
     next(error);
   }
 };
 
-//Get All User
-const getAllAbout = async (req: Request, res: Response) => {
+// Retrieve All About Sections
+const fetchAllAboutSections = async (req: Request, res: Response) => {
   try {
-    const result = await aboutServices.getAllAbout();
-    res.status(201).json({
+    const sections = await aboutServices.getAllAbout();
+    res.status(200).json({
+      // Changed to 200 OK
       success: true,
-      message: "About Retrived successfully",
-      statusCode: 201,
-      data: result,
+      message: "About sections retrieved successfully",
+      statusCode: 200,
+      data: sections,
     });
   } catch (error) {
-    res.status(400).json({
+    res.status(500).json({
+      // Changed to 500 Internal Server Error
       success: false,
-      message: "Failed to retrive About",
-      statusCode: 400,
+      message: "Failed to retrieve about sections",
+      statusCode: 500,
       error: error,
-      stack: "error stack",
+      stack: "error stack", // Consider removing in production
     });
   }
 };
 
-//Update About
-const updateAbout = async (req: Request, res: Response) => {
+// Modify About Section
+const modifyAboutSection = async (req: Request, res: Response) => {
   try {
-    const id = req.params.id;
-    const about = req.body;
+    const sectionId = req.params.id;
+    const updates = req.body;
 
-    // console.log("Come id: ", id);
-    // console.log("Come bhai: ", about);
+    const updateResult = await aboutServices.updatAboutIntoDB(
+      sectionId,
+      updates
+    );
 
-    const result = await aboutServices.updatAboutIntoDB(id, about);
-
-    //Send Response
     res.status(200).json({
-      message: "About updated successfully",
-      status: true,
-      data: result,
+      message: "About section updated successfully",
+      success: true,
+      data: updateResult,
     });
   } catch (error) {
-    //Send Response for error
     res.status(500).json({
-      message: "Something went wrong",
-      status: false,
+      message: "Failed to update about section",
+      success: false,
       data: error,
     });
   }
 };
 
 export const aboutControllers = {
-  addAbout,
-  getAllAbout,
-  updateAbout,
+  addAbout: createAboutSection, // Aliased
+  getAllAbout: fetchAllAboutSections, // Aliased
+  updateAbout: modifyAboutSection, // Aliased
 };

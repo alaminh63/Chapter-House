@@ -1,11 +1,11 @@
 import express from "express";
-import { OrderRoutes } from "../modules/order/order.route";
-import { BookRoutes } from "../modules/book/book.route";
-import { userRoutes } from "../modules/user/user.route";
 import { AuthRoutes } from "../modules/Auth/auth.route";
-import { cartRoutes } from "../modules/Cart/cart.route";
 import { aboutRoutes } from "../modules/About/about.route";
+import { BookRoutes } from "../modules/book/book.route";
+import { cartRoutes } from "../modules/Cart/cart.route";
+import { OrderRoutes } from "../modules/order/order.route";
 import { paymentRoutes } from "../modules/Payment/payment.route";
+import { userRoutes } from "../modules/user/user.route";
 
 const router = express.Router();
 
@@ -38,11 +38,8 @@ const moduleRoutes = [
     path: "/payment",
     route: paymentRoutes,
   },
-  // {
-  //   path: "/admin",
-  //   route: AdminRoutes,
-  // },
 ];
+
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
 
 export default router;

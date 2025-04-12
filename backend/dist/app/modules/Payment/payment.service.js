@@ -16,46 +16,62 @@ exports.PaymentService = exports.updateQuantityRemoveCartAndCheckInStock = expor
 const AppError_1 = __importDefault(require("../../errors/AppError"));
 const book_model_1 = require("../book/book.model");
 const payment_model_1 = require("./payment.model");
+/**
+ * Records a payment in the database.
+ * @param finalOrder The order details to record.
+ * @param productId The ID of the product.
+ * @param quantity The quantity of the product.
+ */
 const makePayment = (finalOrder, productId, quantity) => __awaiter(void 0, void 0, void 0, function* () {
-    // Wait for the order creation
-    const result = yield payment_model_1.paymentModel.create(finalOrder);
+    yield payment_model_1.paymentModel.create(finalOrder);
 });
 exports.makePayment = makePayment;
+/**
+ * Checks if the requested quantity of a book is available.
+ * @param productId The ID of the book.
+ * @param quantity The requested quantity.
+ * @returns True if the quantity is available, false otherwise.
+ */
 const checkQuantityOfBook = (productId, quantity) => __awaiter(void 0, void 0, void 0, function* () {
-    //Check quantity of Book
-    console.log("Come product id for check book: ", productId);
-    const targetBook = yield book_model_1.Book.findOne({
+    console.log("Checking book quantity for product ID: ", productId);
+    const book = yield book_model_1.Book.findOne({
         _id: productId,
     });
-    // console.log("Target Book: ", targetBook);
-    if (!targetBook) {
+    if (!book) {
         return false;
     }
-    if ((targetBook === null || targetBook === void 0 ? void 0 : targetBook.quantity) < quantity) {
+    if ((book === null || book === void 0 ? void 0 : book.quantity) < quantity) {
         return false;
     }
-    console.log("Target Book Quantity: ", targetBook === null || targetBook === void 0 ? void 0 : targetBook.quantity);
+    console.log("Available book quantity: ", book === null || book === void 0 ? void 0 : book.quantity);
     return true;
 });
 exports.checkQuantityOfBook = checkQuantityOfBook;
+/**
+ * Updates the book quantity, removes the item from the cart, and checks if the book is in stock.
+ * @param productId The ID of the book.
+ * @param cartId The ID of the cart.
+ * @param quantity The quantity of the book.
+ */
 const updateQuantityRemoveCartAndCheckInStock = (productId, cartId, quantity) => __awaiter(void 0, void 0, void 0, function* () {
-    //inStock make false if quantity is 0
-    const targetBookAgain = yield book_model_1.Book.findOne({
+    const bookAgain = yield book_model_1.Book.findOne({
         _id: productId,
     });
-    if (!targetBookAgain) {
+    if (!bookAgain) {
         return;
     }
-    const againTargetBookQuantity = targetBookAgain === null || targetBookAgain === void 0 ? void 0 : targetBookAgain.quantity;
-    console.log("Again Target Book Quantity: ", againTargetBookQuantity);
-    if (againTargetBookQuantity == 0) {
-        const inStockRes = yield book_model_1.Book.updateOne({ _id: productId }, { inStock: false });
-        console.log("After in Stock false: ", inStockRes);
+    const currentQuantity = bookAgain === null || bookAgain === void 0 ? void 0 : bookAgain.quantity;
+    console.log("Current book quantity: ", currentQuantity);
+    if (currentQuantity === 0) {
+        yield book_model_1.Book.updateOne({ _id: productId }, { inStock: false });
     }
     return;
 });
 exports.updateQuantityRemoveCartAndCheckInStock = updateQuantityRemoveCartAndCheckInStock;
-///Get All Payment by admin
+/**
+ * Retrieves all payments from the database (Admin only).
+ * @returns An array of all payments, populated with product and user details.
+ */
 const getAllPaymentByAdminFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield payment_model_1.paymentModel
         .find()
@@ -63,46 +79,62 @@ const getAllPaymentByAdminFromDB = () => __awaiter(void 0, void 0, void 0, funct
         .populate("userId");
     return result;
 });
-// Get all Payment by User
+/**
+ * Retrieves all payments for a specific user from the database.
+ * @param id The ID of the user.
+ * @returns An array of payments for the specified user, populated with product details.
+ */
 const getSpecificPaymentFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield payment_model_1.paymentModel.find({ userId: id }).populate("productId");
     return result;
 });
-// Delete Payment
+/**
+ * Deletes a payment from the database.
+ * @param id The ID of the payment to delete.
+ * @param loggedUserId The ID of the logged-in user (for authorization).
+ * @returns The result of the deletion operation.
+ * @throws AppError if the user is not authorized to delete the payment.
+ */
 const deletePaymentFromDB = (id, loggedUserId) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
-    ///Check user right or wrong
-    const prvCheck = yield payment_model_1.paymentModel.findById({ _id: id });
-    if (((_a = prvCheck === null || prvCheck === void 0 ? void 0 : prvCheck.userId) === null || _a === void 0 ? void 0 : _a.toString()) !== loggedUserId) {
-        console.log("Payment user id--------: ", (_b = prvCheck === null || prvCheck === void 0 ? void 0 : prvCheck.userId) === null || _b === void 0 ? void 0 : _b.toString());
-        console.log("logged user id------: ", loggedUserId);
-        throw new AppError_1.default(401, "You are not authorized");
+    const paymentRecord = yield payment_model_1.paymentModel.findById({ _id: id });
+    if (((_a = paymentRecord === null || paymentRecord === void 0 ? void 0 : paymentRecord.userId) === null || _a === void 0 ? void 0 : _a.toString()) !== loggedUserId) {
+        console.log("Payment user ID: ", (_b = paymentRecord === null || paymentRecord === void 0 ? void 0 : paymentRecord.userId) === null || _b === void 0 ? void 0 : _b.toString());
+        console.log("Logged-in user ID: ", loggedUserId);
+        throw new AppError_1.default(401, "Unauthorized to delete this payment.");
     }
-    //main work
     const result = yield payment_model_1.paymentModel.findByIdAndDelete({ _id: id });
     return result;
 });
-// Delete Payment
+/**
+ * Deletes a payment from the database by an admin.
+ * @param id The ID of the payment to delete.
+ * @param loggedUserId The ID of the logged-in admin user.
+ * @returns The result of the deletion operation.
+ */
 const deletePaymentByAdminFromDB = (id, loggedUserId) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("Delete order (admin id:)", loggedUserId);
+    console.log("Deleting order (admin ID:)", loggedUserId);
     const result = yield payment_model_1.paymentModel.findByIdAndDelete({ _id: id });
     return result;
 });
-//confirm payment by admin
+/**
+ * Confirms a payment and updates the book quantity.
+ * @param id The ID of the payment to confirm.
+ * @param payload The payment confirmation payload, including bookId, quantity and adminApproval status.
+ */
 const confirmPaymentFromDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
     const bookId = payload === null || payload === void 0 ? void 0 : payload.bookId;
     const quantity = payload === null || payload === void 0 ? void 0 : payload.quantity;
     const adminApproval = payload === null || payload === void 0 ? void 0 : payload.adminApproval;
-    console.log("AdminApproval: ", adminApproval);
-    console.log("Book id: ", bookId);
-    console.log("quantity: ", quantity);
-    const res = yield payment_model_1.paymentModel.findByIdAndUpdate({ _id: id }, { adminApproval: adminApproval }, {
+    console.log("Admin approval status: ", adminApproval);
+    console.log("Book ID: ", bookId);
+    console.log("Quantity: ", quantity);
+    const paymentUpdateResult = yield payment_model_1.paymentModel.findByIdAndUpdate({ _id: id }, { adminApproval: adminApproval }, {
         new: true,
     });
-    if ((res === null || res === void 0 ? void 0 : res.adminApproval) !== "confirm") {
+    if ((paymentUpdateResult === null || paymentUpdateResult === void 0 ? void 0 : paymentUpdateResult.adminApproval) !== "confirm") {
         return;
     }
-    ///Reduce Quantity of Book
     const targetBook = yield book_model_1.Book.findOne({
         _id: bookId,
     });
@@ -111,11 +143,11 @@ const confirmPaymentFromDB = (id, payload) => __awaiter(void 0, void 0, void 0, 
     }
     const tarGetBookQuantity = targetBook === null || targetBook === void 0 ? void 0 : targetBook.quantity;
     console.log("Target Book Quantity: ", tarGetBookQuantity);
-    const updateQuantitiesRes = yield book_model_1.Book.findByIdAndUpdate({ _id: bookId }, { quantity: tarGetBookQuantity - quantity }, {
+    const updatedBookResult = yield book_model_1.Book.findByIdAndUpdate({ _id: bookId }, { quantity: tarGetBookQuantity - quantity }, {
         new: true,
     });
-    console.log("After Update BOOk Quantity: ", updateQuantitiesRes);
-    if ((updateQuantitiesRes === null || updateQuantitiesRes === void 0 ? void 0 : updateQuantitiesRes.quantity) !== 0) {
+    console.log("After Update BOOk Quantity: ", updatedBookResult);
+    if ((updatedBookResult === null || updatedBookResult === void 0 ? void 0 : updatedBookResult.quantity) !== 0) {
         return;
     }
     const updateBookInStockFalseRes = yield book_model_1.Book.findByIdAndUpdate({ _id: bookId }, { inStock: false }, {
