@@ -33,14 +33,11 @@ const getAllBookByAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
     const books = yield book_model_1.Book.find();
     return books;
 });
-// Retrieves books from the database based on provided query parameters.
 const getAllBooksFromDB = (queryParams) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { searchTerm, category, author, brand, model, minPrice, maxPrice, minQuantity, maxQuantity, inStock, page = 1, // Default page to 1
-        limit = 10, // Default limit to 10
-        sortBy, sortOrder, } = queryParams;
+        const { searchTerm, category, author, brand, model, minPrice, maxPrice, minQuantity, maxQuantity, inStock, page = 1, limit = 10, sortBy, sortOrder, } = queryParams;
         const query = {};
-        // Apply search term if provided (case-insensitive)
+        // Apply search term (case-insensitive)
         if (searchTerm) {
             query.$or = [
                 { title: { $regex: searchTerm, $options: "i" } },
@@ -48,11 +45,13 @@ const getAllBooksFromDB = (queryParams) => __awaiter(void 0, void 0, void 0, fun
                 { category: { $regex: searchTerm, $options: "i" } },
             ];
         }
-        // Apply other filters if provided
+        // Apply other filters
         if (category)
             query.category = category;
-        if (author)
-            query.author = author;
+        // Modified author filter for case-insensitive and partial matching
+        if (author) {
+            query.author = { $regex: author, $options: "i" };
+        }
         if (brand)
             query.brand = brand;
         if (model)
@@ -75,21 +74,19 @@ const getAllBooksFromDB = (queryParams) => __awaiter(void 0, void 0, void 0, fun
             if (maxQuantity !== undefined)
                 query.quantity.$lte = maxQuantity;
         }
-        // Calculate skip value for pagination
         const skip = (page - 1) * limit;
-        // Define sorting options
+        // Sorting Options
         const sortOptions = {};
-        if (sortBy) {
-            sortOptions[sortBy] = sortOrder;
+        if (sortBy && sortOrder) {
+            // Ensure both sortBy and sortOrder are present
+            sortOptions[sortBy] = sortOrder === "desc" ? "desc" : "asc"; // Explicitly handle 'desc' and default to 'asc'
         }
-        // Fetch books from the database with applied filters, sorting, pagination
         const books = yield book_model_1.Book.find(query)
             .sort(sortOptions)
             .skip(skip)
             .limit(limit)
-            .exec(); // Explicitly execute the query
-        // Count total number of documents matching the query
-        const totalBooks = yield book_model_1.Book.countDocuments(query).exec(); // Explicitly execute the query
+            .exec();
+        const totalBooks = yield book_model_1.Book.countDocuments(query).exec();
         return {
             data: books,
             totalBooks,
@@ -98,8 +95,9 @@ const getAllBooksFromDB = (queryParams) => __awaiter(void 0, void 0, void 0, fun
         };
     }
     catch (error) {
-        console.error("Error fetching books from DB:", error); // Log the error
-        throw new Error("Failed to retrieve books.");
+        // Use "any" or a more specific error type
+        console.error("Error fetching books from DB:", error);
+        throw new Error(error.message || "Failed to retrieve books."); // Include the error message for better debugging
     }
 });
 exports.getAllBooksFromDB = getAllBooksFromDB;
@@ -134,7 +132,7 @@ const getHomeBookFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const homeBooks = yield book_model_1.Book.find()
             .sort({ createdAt: -1 })
-            .limit(6)
+            .limit(8)
             .populate("refUser")
             .exec(); // Explicitly execute the query
         return homeBooks;

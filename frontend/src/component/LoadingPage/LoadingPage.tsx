@@ -1,31 +1,23 @@
-import "./LoadingPage.css";
-
 const LoadingPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-600 to-purple-900 flex items-center justify-center">
-      <div className="text-center">
-        {/* Logo or Title (Optional) */}
-        <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 mb-4 fade-in-infinite">
-          Boundless Reads
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="text-center space-y-6">
+        {/* Logo or Title */}
+        <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-400 animate-pulse">
+          ChapterHouse
         </h1>
 
         {/* Loading Spinner with Animation */}
-        <div className="flex justify-center items-center space-x-2 bounce-in">
-          <div className="w-12 h-12 border-4 border-t-4 border-purple-500 border-solid rounded-full spinner"></div>
-          <div
-            className="text-white font-semibold text-lg fade-in"
-            style={{ animationDelay: "1s" }}
-          >
+        <div className="flex items-center justify-center space-x-4">
+          <div className="w-10 h-10 border-4 border-t-4 border-indigo-500 border-solid rounded-full animate-spin"></div>
+          <span className="text-gray-300 font-medium text-lg animate-pulse">
             Loading...
-          </div>
+          </span>
         </div>
 
-        {/* Subtext (Optional) */}
-        <p
-          className="mt-4 text-lg text-white fade-in"
-          style={{ animationDelay: "2s" }}
-        >
-          Please wait while we get things ready for you.
+        {/* Subtext */}
+        <p className="text-gray-400 text-base">
+          Please wait while we prepare your experience.
         </p>
       </div>
     </div>

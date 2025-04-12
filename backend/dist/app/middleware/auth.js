@@ -19,9 +19,7 @@ const auth = (...requiredRoles) => {
     return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const extractedToken = req.headers.authorization;
-            console.log("Extracted token: ", extractedToken);
             const token = extractedToken.split(" ")[1];
-            console.log("Token===: ", token);
             //if the token is sent from the client
             if (!token) {
                 throw new AppError_1.default(401, "You are not Authorized");
@@ -31,8 +29,6 @@ const auth = (...requiredRoles) => {
                 if (err) {
                     throw new AppError_1.default(401, "Invalid Token");
                 }
-                console.log("**************");
-                console.log("Decode: ", decoded);
                 const role = decoded.role;
                 if (requiredRoles.length > 0 && !requiredRoles.includes(role)) {
                     console.log("Required Roles: ", requiredRoles);

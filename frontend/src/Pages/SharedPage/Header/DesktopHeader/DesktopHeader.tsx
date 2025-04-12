@@ -12,12 +12,12 @@ const DesktopHeader = () => {
   return (
     <div className=" text-white  bg-[#0F172A]">
       <div className="max-w-[100rem] mx-auto p-2  flex justify-between items-center px-10 relative z-10">
-        <div className=" w-[25%]  flex items-center gap-x-4">
+        <div className=" w-[25%]  flex items-center gap-x-1">
           <Link to={"/"}>
             {" "}
             <img src={logo} alt="" className="w-[75px] h-[75px] rounded-full" />
           </Link>
-          <p className="font-bold text-xl">Boundless Reads</p>
+          <p className="font-bold text-2xl">ChapterHouse</p>
         </div>
         <div className="flex justify-center  gap-4 w-[50%] ">
           <NavLink

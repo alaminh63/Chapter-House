@@ -17,13 +17,16 @@ const MyCart = () => {
   const [initialPayment] = useInitialPayMutation();
   const { data, isLoading } = useGetMyCartQuery((user as TUser)?._id);
   const carts = data?.data;
-  console.log("My Cart: ", carts);
 
   const handleDelete = async (id: string) => {
     toast.loading("Deleting", { id: sonarId });
-    const res = await deleteCart(id).unwrap();
-    if (res?.status) {
-      toast.success("Cart Deleted Successfully", { id: sonarId });
+    try {
+      const res = await deleteCart(id).unwrap();
+      if (res?.status) {
+        toast.success("Cart Deleted Successfully", { id: sonarId });
+      }
+    } catch (error) {
+      toast.error("Failed to delete cart item", { id: sonarId });
     }
   };
 
@@ -44,9 +47,13 @@ const MyCart = () => {
       quantity: quantity,
     };
     toast.loading("Confirming Order", { id: sonarId });
-    const res = await initialPayment(orderData).unwrap();
-    if (res?.url) {
-      window.location.replace(res?.url);
+    try {
+      const res = await initialPayment(orderData).unwrap();
+      if (res?.url) {
+        window.location.replace(res?.url);
+      }
+    } catch (error) {
+      toast.error("Failed to confirm order", { id: sonarId });
     }
   };
 
@@ -55,14 +62,21 @@ const MyCart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-500 to-purple-900 text-white py-12">
-      <div className="container mx-auto px-4">
-        <h1 className="text-4xl font-bold text-center mb-12">
-          🛒 Checkout Cart
+    <div className="min-h-screen   text-gray-100  ">
+      <div className="container mx-auto px-4 md:px-6">
+        <h1 className="text-3xl font-bold text-center text-gray-100 mb-10">
+          Your Shopping Cart
         </h1>
         {carts?.length === 0 ? (
-          <div className="text-center">
-            <p className="text-2xl font-bold">Your cart is empty!</p>
+          <div className="text-center py-16 bg-gray-700 rounded-xl shadow-sm">
+            <p className="text-xl font-medium text-gray-300">Your cart is empty!</p>
+            <a
+              href="/shop"
+              className="mt-4 inline-flex items-center px-5 py-2.5 bg-indigo-500 text-white text-sm font-medium rounded-lg shadow-md hover:bg-indigo-600 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-gray-800"
+              aria-label="Browse Shop"
+            >
+              Browse Shop
+            </a>
           </div>
         ) : (
           <div className="space-y-6">
@@ -70,9 +84,9 @@ const MyCart = () => {
             {carts?.map((cartItem: any, idx: number) => (
               <div
                 key={idx}
-                className=" bg-white/10 p-6 rounded-lg shadow-lg flex flex-col md:flex-row items-center gap-6"
+                className="bg-gray-700 p-6 rounded-xl shadow-sm flex flex-col md:flex-row items-start md:items-center gap-6 border border-gray-600"
               >
-                <div className="w-32 h-48">
+                <div className="w-24 h-36 flex-shrink-0">
                   <img
                     src={cartItem?.bookId?.imageUrl}
                     alt={cartItem?.bookId?.title}
@@ -80,39 +94,35 @@ const MyCart = () => {
                   />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold">
+                  <h2 className="text-xl font-semibold text-gray-100">
                     {cartItem.bookId?.title}
                   </h2>
-                  <p className="text-lg italic">
+                  <p className="text-sm text-gray-300 italic">
                     by {cartItem?.bookId?.author}
                   </p>
-                  <div className="my-3 space-y-1">
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-200">
                     <p>
-                      <span className="font-semibold">Category:</span>{" "}
-                      <span className="text-yellow-400">
-                        {cartItem?.bookId?.category}
-                      </span>
+                      <span className="font-medium">Category:</span>{" "}
+                      {cartItem?.bookId?.category}
                     </p>
                     <p>
-                      <span className="font-semibold">Model:</span>{" "}
-                      <span className="text-green-400">
-                        {cartItem?.bookId?.model}
-                      </span>
+                      <span className="font-medium">Model:</span>{" "}
+                      {cartItem?.bookId?.model}
                     </p>
                     <p>
-                      <span className="font-semibold">Price:</span>{" "}
-                      <span className="text-orange-400">
-                        ${cartItem?.bookId?.price}
-                      </span>
+                      <span className="font-medium">Price:</span> ${cartItem?.bookId?.price}
                     </p>
                     <p>
-                      <span className="font-semibold">Quantity:</span>{" "}
-                      {cartItem?.quantity}
+                      <span className="font-medium">Quantity:</span> {cartItem?.quantity}
+                    </p>
+                    <p className="sm:col-span-2">
+                      <span className="font-medium">Total:</span> $
+                      {(Number(cartItem?.bookId?.price) * Number(cartItem?.quantity)).toFixed(2)}
                     </p>
                   </div>
-                  <div className="flex gap-4 mt-4">
+                  <div className="flex flex-col sm:flex-row gap-3 mt-4">
                     <button
-                      className="bg-purple-500 hover:bg-purple-800 text-white font-bold py-2 px-4 rounded transition duration-300"
+                      className="px-5 py-2.5 bg-indigo-500 text-white text-sm font-medium rounded-lg shadow-md hover:bg-indigo-600 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-gray-800"
                       onClick={() =>
                         handleConfirmOrder(
                           cartItem._id,
@@ -121,14 +131,16 @@ const MyCart = () => {
                           cartItem?.quantity
                         )
                       }
+                      aria-label={`Confirm order for ${cartItem.bookId?.title}`}
                     >
                       Confirm Order
                     </button>
                     <button
-                      className="bg-red-600 hover:bg-red-900 text-white font-bold py-2 px-4 rounded transition duration-300"
+                      className="px-5 py-2.5 bg-red-500 text-white text-sm font-medium rounded-lg shadow-md hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-gray-800"
                       onClick={() => handleDelete(cartItem?._id)}
+                      aria-label={`Delete ${cartItem.bookId?.title} from cart`}
                     >
-                      Delete from Cart
+                      Remove
                     </button>
                   </div>
                 </div>

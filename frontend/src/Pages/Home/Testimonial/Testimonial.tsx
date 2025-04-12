@@ -1,90 +1,94 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import TestimonialCard from "./TestimonialCard/TestimonialCard";
-import "./Testimonial.css";
 import SectionTitle from "../../SharedPage/SectionTitle/SectionTitle";
+
 const Testimonial = () => {
-  const [testimonials, setTestimonials] = useState([]);
+  const [testimonials, setTestimonials] = useState<TReview[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Fetch testimonials
   useEffect(() => {
-    fetch("/testimonial.json")
-      .then((res) => res.json())
-      .then((data) => setTestimonials(data));
+    const fetchTestimonials = async () => {
+      try {
+        const res = await fetch("/testimonial.json");
+        const data = await res.json();
+        setTestimonials(data);
+      } catch (error) {
+        console.error("Failed to fetch testimonials:", error);
+      }
+    };
+    fetchTestimonials();
   }, []);
 
-  //   console.log("Testimonials: ", testimonials);
-  //   console.log("Testimonials length: ", testimonials.length);
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const startX = useRef(null);
-
+  // Auto-slide effect
   useEffect(() => {
+    if (testimonials.length === 0) return;
+
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
-    }, 3000); // Change the interval time as needed
+      setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [testimonials]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleStart = (e: any) => {
-    startX.current = e.clientX || e.touches[0].clientX;
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleMove = (e: any) => {
-    if (startX.current === null) return;
-
-    const x = e.clientX || e.touches[0].clientX;
-    const deltaX = x - startX.current;
-
-    if (deltaX > 50) {
-      // Swipe right
-      setCurrentIndex((prevIndex) =>
-        prevIndex === 0 ? testimonials.length - 1 : prevIndex - 1
+  // Swipe navigation
+  const handleSwipe = useCallback(
+    (direction: "prev" | "next") => {
+      setCurrentIndex((prev) =>
+        direction === "next"
+          ? (prev + 1) % testimonials.length
+          : prev === 0
+            ? testimonials.length - 1
+            : prev - 1
       );
-      startX.current = null;
-    } else if (deltaX < -50) {
-      // Swipe left
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
-      startX.current = null;
-    }
-  };
+    },
+    [testimonials.length]
+  );
 
-  const handleEnd = () => {
-    startX.current = null;
-  };
   return (
-    <div>
-      <SectionTitle subHeading={"Explore Fan's Review"} heading={"Review"} />
-      <div className="flex flex-col items-center justify-center">
-        <h1 className="text-2xl md:text-3xl font-bold text-white mb-10">
-          OUR SATISFIED CUSTOMERS FEEDBACK
-        </h1>
-      </div>
-
-      <div
-        className="testimonial-container  "
-        onMouseDown={handleStart}
-        onMouseMove={handleMove}
-        onMouseUp={handleEnd}
-        onMouseLeave={handleEnd}
-        onTouchStart={handleStart}
-        onTouchMove={handleMove}
-        onTouchEnd={handleEnd}
-      >
-        <div
-          className="testimonial-wrapper"
-          style={{
-            transform: `translateX(-${currentIndex * 100}%)`,
-          }}
-        >
-          {testimonials.map((testimonial, index) => (
-            <div key={index} className="testimonial-slide">
-              <TestimonialCard testimonial={testimonial} />
+    <section className=" py-16">
+      <div className="container mx-auto px-4 text-center">
+       
+        <SectionTitle
+        subHeading={"Explore feedback from our  clients"}
+        heading={" What Our Customers Say"}
+      />
+        {testimonials.length > 0 ? (
+          <div className="relative">
+            <div className="overflow-hidden">
+              <div
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+              >
+                {testimonials.map((testimonial, index) => (
+                  <div key={index} className="w-full flex-shrink-0">
+                    <TestimonialCard testimonial={testimonial} />
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
+
+            {/* Navigation Buttons */}
+            <button
+              onClick={() => handleSwipe("prev")}
+              className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-slate-700 p-3 text-white transition-colors hover:bg-slate-600"
+              aria-label="Previous testimonial"
+            >
+              ←
+            </button>
+            <button
+              onClick={() => handleSwipe("next")}
+              className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-slate-700 p-3 text-white transition-colors hover:bg-slate-600"
+              aria-label="Next testimonial"
+            >
+              →
+            </button>
+          </div>
+        ) : (
+          <p className="text-zinc-500">Loading testimonials...</p>
+        )}
       </div>
-    </div>
+    </section>
   );
 };
 

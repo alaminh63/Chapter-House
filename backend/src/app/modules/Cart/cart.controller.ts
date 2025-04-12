@@ -6,6 +6,7 @@ import AppError from "../../errors/AppError";
 const createCart: RequestHandler = async (req, res, next) => {
   try {
     const newCart = req.body;
+    console.log("newCart: ", newCart);
     if (newCart?.userId !== req?.user?._id) {
       console.log("Cart user: ", newCart?.userId);
       console.log("Logged user id: ", req?.user?._id);

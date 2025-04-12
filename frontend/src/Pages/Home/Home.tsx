@@ -13,11 +13,11 @@ const Home = () => {
         <div className="max-w-[100rem] mx-auto">
           <NewBanner />
         </div>
-        <div className="max-w-[100rem] mx-auto ">
-          <ImageGallery />
-        </div>
+
         <div className="max-w-[100rem] mx-auto ">
           <HomeBook />
+        </div> <div className="max-w-[100rem] mx-auto ">
+          <ImageGallery />
         </div>
         <Testimonial />
       </div>
