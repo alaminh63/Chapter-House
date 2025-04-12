@@ -27,6 +27,8 @@ const getAllBookByAdmin = async (): Promise<TBook[]> => {
 };
 
 // Retrieves books from the database based on provided query parameters.
+import { SortOrder } from "mongoose"; // Import SortOrder from mongoose
+
 export const getAllBooksFromDB = async (
   queryParams: BookQueryParams
 ): Promise<{
@@ -47,15 +49,15 @@ export const getAllBooksFromDB = async (
       minQuantity,
       maxQuantity,
       inStock,
-      page = 1, // Default page to 1
-      limit = 10, // Default limit to 10
+      page = 1,
+      limit = 10,
       sortBy,
       sortOrder,
     } = queryParams;
 
     const query: any = {};
 
-    // Apply search term if provided (case-insensitive)
+    // Apply search term (case-insensitive)
     if (searchTerm) {
       query.$or = [
         { title: { $regex: searchTerm, $options: "i" } },
@@ -64,9 +66,14 @@ export const getAllBooksFromDB = async (
       ];
     }
 
-    // Apply other filters if provided
+    // Apply other filters
     if (category) query.category = category;
-    if (author) query.author = author;
+
+    // Modified author filter for case-insensitive and partial matching
+    if (author) {
+      query.author = { $regex: author, $options: "i" };
+    }
+
     if (brand) query.brand = brand;
     if (model) query.model = model;
     if (inStock !== undefined) query.inStock = inStock;
@@ -85,24 +92,22 @@ export const getAllBooksFromDB = async (
       if (maxQuantity !== undefined) query.quantity.$lte = maxQuantity;
     }
 
-    // Calculate skip value for pagination
     const skip = (page - 1) * limit;
 
-    // Define sorting options
+    // Sorting Options
     const sortOptions: Record<string, SortOrder> = {};
-    if (sortBy) {
-      sortOptions[sortBy] = sortOrder as SortOrder;
+    if (sortBy && sortOrder) {
+      // Ensure both sortBy and sortOrder are present
+      sortOptions[sortBy] = sortOrder === "desc" ? "desc" : "asc"; // Explicitly handle 'desc' and default to 'asc'
     }
 
-    // Fetch books from the database with applied filters, sorting, pagination
     const books = await Book.find(query)
       .sort(sortOptions)
       .skip(skip)
       .limit(limit)
-      .exec(); // Explicitly execute the query
+      .exec();
 
-    // Count total number of documents matching the query
-    const totalBooks = await Book.countDocuments(query).exec(); // Explicitly execute the query
+    const totalBooks = await Book.countDocuments(query).exec();
 
     return {
       data: books,
@@ -110,9 +115,10 @@ export const getAllBooksFromDB = async (
       currentPage: page,
       totalPages: Math.ceil(totalBooks / limit),
     };
-  } catch (error) {
-    console.error("Error fetching books from DB:", error); // Log the error
-    throw new Error("Failed to retrieve books.");
+  } catch (error: any) {
+    // Use "any" or a more specific error type
+    console.error("Error fetching books from DB:", error);
+    throw new Error(error.message || "Failed to retrieve books."); // Include the error message for better debugging
   }
 };
 
@@ -149,7 +155,7 @@ const getHomeBookFromDB = async (): Promise<TBook[]> => {
   try {
     const homeBooks = await Book.find()
       .sort({ createdAt: -1 })
-      .limit(6)
+      .limit(8)
       .populate("refUser")
       .exec(); // Explicitly execute the query
     return homeBooks;
