@@ -1,87 +1,105 @@
 import LoadingPage from "../../../component/LoadingPage/LoadingPage";
 import { useGetBookImagesQuery } from "../../../Redux/api/features/Book/bookManagementApi";
-import "./ImageGallery.css";
 import SectionTitle from "../../SharedPage/SectionTitle/SectionTitle";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
 const ImageGallery = () => {
   const { data, isLoading } = useGetBookImagesQuery(undefined);
   const bookImages = data?.data;
-  // console.log("Image: ", bookImages);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const [selectedImage, setSelectedImage] = useState(null);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const openImage = (imageUrl: any) => {
+  const openImage = (imageUrl: string) => {
     setSelectedImage(imageUrl);
+    document.body.style.overflow = "hidden";
   };
 
   const closeImage = () => {
     setSelectedImage(null);
+    document.body.style.overflow = "auto";
   };
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && selectedImage) {
+        closeImage();
+      }
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [selectedImage]);
+
   if (isLoading) {
     return <LoadingPage />;
   }
 
   return (
-    <div>
+    <div className="max-w-7xl mx-auto px-4 py-8">
       <SectionTitle
-        subHeading={"Explore Our Latest Book Image"}
+        subHeading={"Explore Our Latest Book Collection"}
         heading={"Image Gallery"}
       />
-      <div className="">
-        {/* Image Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {bookImages?.map((image: { imageUrl: string }, index: number) => (
-            <div
-              key={index}
-              className="relative overflow-hidden rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer"
-              onClick={() => openImage(image.imageUrl)}
-            >
-              <img
-                src={image.imageUrl}
-                alt={`Book ${index + 1}`}
-                className="w-full h-64 object-cover rounded-lg"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-300"></div>
-            </div>
-          ))}
-        </div>
 
-        {/* Lightbox Modal */}
-        {selectedImage && (
+      {/* Image Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {bookImages?.map((image: { imageUrl: string }, index: number) => (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
-            onClick={closeImage}
+            key={index}
+            className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300"
+            onClick={() => openImage(image.imageUrl)}
           >
-            <div className="relative max-w-4xl w-full p-4">
-              <img
-                src={selectedImage}
-                alt="Selected Book"
-                className="w-full h-auto rounded-lg shadow-2xl"
-              />
-              <button
-                onClick={closeImage}
-                className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-lg hover:bg-gray-200 transition-all duration-300"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-gray-800"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
+            <img
+              src={image.imageUrl}
+              alt={`Book ${index + 1}`}
+              className="w-full h-72 object-cover transition-transform duration-300 group-hover:scale-110"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium">
+              View Image
             </div>
           </div>
-        )}
+        ))}
       </div>
+
+      {/* Lightbox Modal */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in-0 duration-300 cursor-default"
+          onClick={closeImage}
+        >
+          <div
+            className="relative max-w-5xl   m-4 flex flex-col items-end gap-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={closeImage}
+              className="p-2 bg-white/90 absolute -right-12  rounded-full shadow-lg hover:bg-white transition-all duration-200 z-10"
+              aria-label="Close modal"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-gray-800"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            <img
+              src={selectedImage}
+              alt="Selected Book"
+              className="w-full h-auto max-h-[80vh] object-contain rounded-xl shadow-2xl"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -2,49 +2,41 @@ import { Rating } from "@smastrom/react-rating";
 import "@smastrom/react-rating/style.css";
 import { TReview } from "../../../../utils/Types/GlobalType";
 
-interface IProps {
+interface TestimonialCardProps {
   testimonial: TReview;
 }
-const TestimonialCard = ({ testimonial }: IProps) => {
+
+const TestimonialCard = ({ testimonial }: TestimonialCardProps) => {
   const { image, desc, rating, name, position } = testimonial;
 
   return (
-    <div className="flex flex-col md:flex-row w-full md:w-[80%] mx-auto bg-gray-800 p-6 rounded-lg shadow-md">
-      {/* Left Div */}
-      <div className="w-full md:w-[20%] flex justify-center md:justify-between">
-        <div className="flex items-center justify-center">
-          <img
-            src={image}
-            alt={name}
-            className="w-[150px] h-[150px] rounded-full object-cover shadow-lg"
-          />
-        </div>
-        <div className="h-full relative hidden md:flex items-center">
-          <div className="absolute w-[25px] h-[2px] bg-gray-300 top-[50%] right-0"></div>
-          <div className="w-[1px] h-[150px] bg-gray-300"></div>
-        </div>
+    <article className="mx-auto flex w-full max-w-3xl flex-col overflow-hidden rounded-xl bg-slate-800 p-6 shadow-lg md:flex-row">
+      {/* Image Section */}
+      <div className="flex justify-center md:w-1/4 md:justify-start">
+        <img
+          src={image}
+          alt={`${name}'s testimonial`}
+          className="h-32 w-32 rounded-full object-cover ring-2 ring-slate-700"
+          loading="lazy"
+        />
       </div>
 
-      {/* Right Div */}
-      <div className="w-full md:w-[80%] flex flex-col gap-4 px-5 mt-10 md:mt-0">
-        <div className="text-center text-lg text-gray-200 italic">"{desc}"</div>
-        <div className="flex justify-center md:justify-start items-center space-x-2">
-          <div>
-            <Rating style={{ maxWidth: 120 }} value={rating} readOnly />
-          </div>
-          <span className="text-yellow-500">{rating.toFixed(1)} / 5</span>
+      {/* Content Section */}
+      <div className="flex flex-1 flex-col gap-4 p-4 md:p-6">
+        <blockquote className="text-center text-base italic text-zinc-300 md:text-left">
+          “{desc}”
+        </blockquote>
+        <div className="flex items-center justify-center gap-2 md:justify-start">
+          <Rating style={{ maxWidth: 100 }} value={rating} readOnly />
+          <span className="text-sm text-amber-400">{rating.toFixed(1)}/5</span>
         </div>
-        <div className="flex flex-col items-center md:items-start justify-center text-xl">
-          <h1 className="font-bold text-white">{name}</h1>
-          <p className="text-gray-400">{position}</p>
+        <div className="text-center md:text-left">
+          <h3 className="text-lg font-semibold text-white">{name}</h3>
+          <p className="text-sm text-zinc-500">{position}</p>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 
 export default TestimonialCard;
-
-/**
- * urls: https://github.com/smastrom/react-rating
- */

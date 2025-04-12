@@ -8,10 +8,10 @@ export const userDashboards = [
     path: "/user-dashboard/user-profile",
   },
 
-  // {
-  //   text: "My Cart",
-  //   path: "/user-dashboard/user-cart",
-  // },
+  {
+    text: "My Cart",
+    path: "/user-dashboard/user-cart",
+  },
   {
     text: "My Order",
     path: "/user-dashboard/user-order",

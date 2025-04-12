@@ -9,8 +9,8 @@ const MobileHeaderOption = ({ handleClick }: any) => {
   const { token } = useAppSelector((state) => state.auth);
   const dispatch = useDispatch();
   return (
-    <div className="bg-gradient-to-r from-purple-700 via-indigo-800 to-purple-900 text-white flex flex-col gap-4 px-5 py-5 relative z-10">
-      <div className="flex flex-col gap-4 font-bold w-full ">
+    <div className="bg-gradient-to-r  bg-slate-700/90 text-white flex flex-col gap-4 px-5 py-5 relative z-10">
+      <div className="flex flex-col items-center gap-4 font-bold w-full ">
         <NavLink
           className={({ isActive }) => (isActive ? "text-blue-500" : "acLk ")}
           to="/home"
@@ -35,13 +35,13 @@ const MobileHeaderOption = ({ handleClick }: any) => {
           About Us
         </NavLink>
 
-        <div className="w-full  flex justify-start items-center 0">
+        <div className="w-full  flex justify-center items-center 0">
           {token ? (
-            <div className=" flex flex-col items-start gap-x-3">
+            <div className=" flex flex-col items-center gap-x-3">
               <div className="flex flex-row-reverse items-center">
                 <DashboardCart />
-                <DashboradButton />
               </div>
+                <DashboradButton />
               <button
                 className=" btn btn-error text-white mt-3"
                 onClick={() => dispatch(logout())}

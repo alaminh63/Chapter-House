@@ -4,7 +4,6 @@ const cartManagementApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     addCart: builder.mutation({
       query: (data) => {
-        console.log("Data in Query: ", data);
         return {
           url: "/cart",
           method: "POST",
