@@ -7,7 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "sonner";
 import { Provider } from "react-redux";
 import { persistor, store } from "./Redux/store";
-import { PersistGate } from 'redux-persist/integration/react'
+import { PersistGate } from "redux-persist/integration/react";
 import GoTopButton from "./component/GoTopButton/GoTopButton";
 
 createRoot(document.getElementById("root")!).render(

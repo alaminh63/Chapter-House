@@ -14,24 +14,43 @@ const CheckOutPage = () => {
   const { _id } = useParams();
   const { data, isLoading } = useGetSingleBookQuery(_id);
   const book = data?.data;
-  //   console.log("Book: ", book);
-  //   console.log("User: ", user);
 
   const [quantity, setQuantity] = useState(1);
+
+  // Determine maximum quantity allowed based on stock
+  const maxQuantity = book?.inStock ? book.quantity : 0;
+
   const handleQuantity = (value: string) => {
-    if (value == "p") {
-      setQuantity((quantity) => quantity + 1);
-    } else {
-      if (quantity === 0) {
-        return;
+    if (!book?.inStock) {
+      toast.error("This book is currently out of stock.", { id: sonarId });
+      return;
+    }
+
+    if (value === "p") {
+      if (quantity < maxQuantity) {
+        // Check against maximum quantity
+        setQuantity((quantity) => quantity + 1);
+      } else {
+        toast.warn(`Maximum quantity available is ${maxQuantity}`, {
+          id: sonarId,
+        });
       }
-      setQuantity((quantity) => quantity - 1);
+    } else {
+      if (quantity > 1) {
+        // Prevent quantity from going below 1
+        setQuantity((quantity) => quantity - 1);
+      }
     }
   };
 
   const handleBuyNow = async () => {
-    if (!quantity) {
-      toast.error(`Your Quantity is ${quantity}`, { id: sonarId });
+    if (!quantity || quantity <= 0) {
+      toast.error("Please select a valid quantity.", { id: sonarId });
+      return;
+    }
+
+    if (quantity > maxQuantity) {
+      toast.error(`You can't order more than ${maxQuantity}`, { id: sonarId });
       return;
     }
 
@@ -41,18 +60,39 @@ const CheckOutPage = () => {
       quantity,
       price: book?.price * quantity,
     };
-    console.log("Order Data: ", orderData);
-    toast.loading("Wating", { id: sonarId });
 
-    const res = await initialPayment(orderData).unwrap();
-    console.log("Payment res: ", res);
-    if (res?.url) {
-      window.location.replace(res?.url);
+    toast.loading("Processing payment...", { id: sonarId });
+
+    try {
+      const res = await initialPayment(orderData).unwrap();
+
+      if (res?.url) {
+        window.location.replace(res?.url);
+      } else {
+        toast.error("Payment initiation failed.", { id: sonarId });
+      }
+    } catch (error: any) {
+      console.error("Payment error:", error);
+
+      if (error?.data?.message) {
+        toast.error(error?.data?.message, { id: sonarId });
+      } else {
+        toast.error(
+          "An unexpected error occurred during payment.",
+          { id: sonarId }
+        );
+      }
+    } finally {
+      // Consider using toast.remove(sonarId) here if you want to remove the loading toast regardless of success or failure
     }
   };
 
   if (isLoading) {
     return <LoadingPage />;
+  }
+
+  if (!book) {
+    return <div>Book not found!</div>; //Handle the case where book is not found
   }
 
   return (
@@ -86,6 +126,12 @@ const CheckOutPage = () => {
                 <span className="text-2xl font-bold text-yellow-400">
                   ${book?.price?.toFixed(2)}
                 </span>
+
+                {/* Stock Count Display */}
+                <span className="text-lg text-gray-300">
+                  Available Stock: {book.quantity}
+                </span>
+
                 <span
                   className={`text-lg font-semibold px-3 py-1 rounded-lg ${
                     book?.inStock ? "bg-green-500" : "bg-red-500"
@@ -100,6 +146,7 @@ const CheckOutPage = () => {
                 <button
                   className="px-5 py-3 text-lg font-semibold bg-red-500 rounded-lg shadow-md hover:bg-red-600 transition duration-300"
                   onClick={() => handleQuantity("n")}
+                  disabled={!book?.inStock || quantity <= 1} // Disable if out of stock or quantity is 1
                 >
                   -
                 </button>
@@ -109,13 +156,16 @@ const CheckOutPage = () => {
                 <button
                   className="px-5 py-3 text-lg font-semibold bg-green-500 rounded-lg shadow-md hover:bg-green-600 transition duration-300"
                   onClick={() => handleQuantity("p")}
+                  disabled={!book?.inStock || quantity >= maxQuantity} // Disable if out of stock or quantity is at max
                 >
                   +
                 </button>
               </div>
 
               <div className="mt-6 flex items-center space-x-4 bg-blue-600 w-full md:w-1/2 py-2 px-4 rounded-md font-bold">
-                <h1>Total Price: {quantity * book?.price} </h1>
+                <h1>
+                  Total Price: ${(quantity * book?.price).toFixed(2)}{" "}
+                </h1>
               </div>
 
               {/* Buy Now Button */}

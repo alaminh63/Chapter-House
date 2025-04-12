@@ -38,7 +38,7 @@ const AdminDashboardHome = () => {
 
           {/* My Book Card */}
           <Link
-            to="/user-dashboard/user-book"
+            to="/admin-dashboard/book-management"
             className="bg-white/10 p-6 rounded-lg shadow-lg hover:shadow-2xl transition transform hover:scale-105"
           >
             <h2 className="text-2xl font-bold mb-3">📖 Books Management</h2>
