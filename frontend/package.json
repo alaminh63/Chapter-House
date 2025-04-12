@@ -20,6 +20,7 @@
     "antd": "^5.23.2",
     "aos": "^2.3.4",
     "axios": "^1.7.9",
+    "firebase": "^11.6.0",
     "jodit-react": "^5.0.10",
     "jwt-decode": "^4.0.0",
     "lottie-react": "^2.4.1",

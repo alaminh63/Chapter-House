@@ -31,7 +31,7 @@ const CheckOutPage = () => {
         // Check against maximum quantity
         setQuantity((quantity) => quantity + 1);
       } else {
-        toast.warn(`Maximum quantity available is ${maxQuantity}`, {
+        toast.error(`Maximum quantity available is ${maxQuantity}`, {
           id: sonarId,
         });
       }
