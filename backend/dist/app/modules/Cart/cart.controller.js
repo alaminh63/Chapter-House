@@ -20,6 +20,7 @@ const createCart = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
     var _a, _b;
     try {
         const newCart = req.body;
+        console.log("newCart: ", newCart);
         if ((newCart === null || newCart === void 0 ? void 0 : newCart.userId) !== ((_a = req === null || req === void 0 ? void 0 : req.user) === null || _a === void 0 ? void 0 : _a._id)) {
             console.log("Cart user: ", newCart === null || newCart === void 0 ? void 0 : newCart.userId);
             console.log("Logged user id: ", (_b = req === null || req === void 0 ? void 0 : req.user) === null || _b === void 0 ? void 0 : _b._id);
