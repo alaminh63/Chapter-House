@@ -1,32 +1,36 @@
 import { aboutModel } from "./about.model";
 import { TAbout } from "./about.interface";
 
-///Create About into db
-const addAboutIntoDB = async (payload: TAbout) => {
-  //   console.log("Payload: ", payload);
-  const result = await aboutModel.create(payload);
-  return result;
+// Add a new about section to the database
+const createAboutSectionInDB = async (sectionData: TAbout) => {
+  const creationResult = await aboutModel.create(sectionData);
+  return creationResult;
 };
 
-//Get All About from DB
-const getAllAbout = async () => {
-  const result = await aboutModel.find();
-  return result;
+// Retrieve all about sections from the database
+const retrieveAllAboutSections = async () => {
+  const sections = await aboutModel.find();
+  return sections;
 };
 
-//Update About
-const updatAboutIntoDB = async (aboutId: string, payload: TAbout) => {
-  //   console.log("User Id in service: ", userId);
-  //   console.log("payload in service", payload);
-
-  const result = await aboutModel.findByIdAndUpdate({ _id: aboutId }, payload, {
-    new: true,
-  });
-  return result;
+// Update an existing about section in the database
+const updateAboutSectionInDB = async (
+  sectionId: string,
+  updateData: TAbout
+) => {
+  const updatedSection = await aboutModel.findByIdAndUpdate(
+    { _id: sectionId },
+    updateData,
+    {
+      new: true,
+      runValidators: true, // Ensure validators run during update
+    }
+  );
+  return updatedSection;
 };
 
 export const aboutServices = {
-  addAboutIntoDB,
-  getAllAbout,
-  updatAboutIntoDB,
+  addAboutIntoDB: createAboutSectionInDB, // Aliased
+  getAllAbout: retrieveAllAboutSections, // Aliased
+  updatAboutIntoDB: updateAboutSectionInDB, // Aliased
 };

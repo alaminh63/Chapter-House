@@ -16,58 +16,39 @@ exports.BookServices = exports.getAllBooksFromDB = void 0;
 const AppError_1 = __importDefault(require("../../errors/AppError"));
 const user_model_1 = require("../user/user.model");
 const book_model_1 = require("./book.model");
-//Insert book
+// Inserts a new book into the database.  Validates the user reference.
 const createBookIntoDB = (bookData) => __awaiter(void 0, void 0, void 0, function* () {
     const { refUser } = bookData;
-    console.log("Ref User: ", refUser);
-    const isUserExists = yield user_model_1.userModel.findOne({ _id: refUser });
-    console.log("is User exists: ", isUserExists);
+    // Verify that the referenced user exists
+    const isUserExists = yield user_model_1.userModel.findById(refUser);
     if (!isUserExists) {
-        throw new AppError_1.default(404, "Reference User not Exists");
+        throw new AppError_1.default(404, "Referenced user does not exist.");
     }
-    const result = yield book_model_1.Book.create(bookData);
-    return result;
+    // Create the book in the database
+    const createdBook = yield book_model_1.Book.create(bookData);
+    return createdBook;
 });
-///Get All Book by Admin
+// Retrieves all books from the database (for admin access).
 const getAllBookByAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
-    const res = yield book_model_1.Book.find();
-    return res;
+    const books = yield book_model_1.Book.find();
+    return books;
 });
-// // Get all books with all requirement
-// const getAllBooksFromDB = async (searchTerm: string | null) => {
-//   try {
-//     // Build a dynamic query object
-//     const query: any = {};
-//     if (searchTerm) {
-//       query.$or = [
-//         { category: searchTerm }, // Strict match for category
-//         { title: searchTerm }, // Strict match for title
-//         { author: searchTerm }, // Strict match for author
-//       ];
-//       // Fetch results from the database
-//       const result = await Book.find(query);
-//       return result;
-//     }
-//     if (!searchTerm) {
-//       const result = await Book.find();
-//       return result;
-//     }
-//   } catch (error) {
-//     throw new Error("Error while fetching books");
-//   }
-// };
-///Next Get all books code
+// Retrieves books from the database based on provided query parameters.
 const getAllBooksFromDB = (queryParams) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { searchTerm, category, author, brand, model, minPrice, maxPrice, minQuantity, maxQuantity, inStock, page, limit, sortBy, sortOrder, } = queryParams;
+        const { searchTerm, category, author, brand, model, minPrice, maxPrice, minQuantity, maxQuantity, inStock, page = 1, // Default page to 1
+        limit = 10, // Default limit to 10
+        sortBy, sortOrder, } = queryParams;
         const query = {};
+        // Apply search term if provided (case-insensitive)
         if (searchTerm) {
             query.$or = [
-                { title: { $regex: new RegExp(searchTerm, "i") } },
-                { author: { $regex: new RegExp(searchTerm, "i") } },
-                { category: { $regex: new RegExp(searchTerm, "i") } },
+                { title: { $regex: searchTerm, $options: "i" } },
+                { author: { $regex: searchTerm, $options: "i" } },
+                { category: { $regex: searchTerm, $options: "i" } },
             ];
         }
+        // Apply other filters if provided
         if (category)
             query.category = category;
         if (author)
@@ -78,6 +59,7 @@ const getAllBooksFromDB = (queryParams) => __awaiter(void 0, void 0, void 0, fun
             query.model = model;
         if (inStock !== undefined)
             query.inStock = inStock;
+        // Price range filtering
         if (minPrice !== undefined || maxPrice !== undefined) {
             query.price = {};
             if (minPrice !== undefined)
@@ -85,6 +67,7 @@ const getAllBooksFromDB = (queryParams) => __awaiter(void 0, void 0, void 0, fun
             if (maxPrice !== undefined)
                 query.price.$lte = maxPrice;
         }
+        // Quantity range filtering
         if (minQuantity !== undefined || maxQuantity !== undefined) {
             query.quantity = {};
             if (minQuantity !== undefined)
@@ -92,17 +75,21 @@ const getAllBooksFromDB = (queryParams) => __awaiter(void 0, void 0, void 0, fun
             if (maxQuantity !== undefined)
                 query.quantity.$lte = maxQuantity;
         }
+        // Calculate skip value for pagination
         const skip = (page - 1) * limit;
+        // Define sorting options
         const sortOptions = {};
         if (sortBy) {
             sortOptions[sortBy] = sortOrder;
         }
-        // Example: Sort based on title, price, or quantity
+        // Fetch books from the database with applied filters, sorting, pagination
         const books = yield book_model_1.Book.find(query)
-            .sort(sortOptions) // Ensure correct sorting
+            .sort(sortOptions)
             .skip(skip)
-            .limit(limit);
-        const totalBooks = yield book_model_1.Book.countDocuments(query);
+            .limit(limit)
+            .exec(); // Explicitly execute the query
+        // Count total number of documents matching the query
+        const totalBooks = yield book_model_1.Book.countDocuments(query).exec(); // Explicitly execute the query
         return {
             data: books,
             totalBooks,
@@ -111,75 +98,87 @@ const getAllBooksFromDB = (queryParams) => __awaiter(void 0, void 0, void 0, fun
         };
     }
     catch (error) {
-        throw new Error("Error while fetching books");
+        console.error("Error fetching books from DB:", error); // Log the error
+        throw new Error("Failed to retrieve books.");
     }
 });
 exports.getAllBooksFromDB = getAllBooksFromDB;
-//Get Single book
+// Retrieves a single book from the database by its ID.
 const getSingleBookFromDB = (productId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield book_model_1.Book.findOne({ _id: productId });
-        return result;
+        const book = yield book_model_1.Book.findById(productId).exec(); // Explicitly execute the query
+        return book;
     }
     catch (error) {
-        throw new Error("Book Not Found");
+        console.error("Error fetching single book from DB:", error);
+        throw new Error("Failed to retrieve the book.");
     }
 });
-//Get Images of book
+// Retrieves a limited number of book images from the database.
 const getImagesOfBookFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield book_model_1.Book.find()
+        const images = yield book_model_1.Book.find()
             .select("imageUrl")
             .limit(12)
-            .populate("refUser");
-        return result;
+            .populate("refUser")
+            .exec(); // Explicitly execute the query
+        return images;
     }
     catch (error) {
-        throw new Error("Book Not Found");
+        console.error("Error fetching book images from DB:", error);
+        throw new Error("Failed to retrieve book images.");
     }
 });
-//Get Home book
+// Retrieves a limited number of recently created books for the homepage.
 const getHomeBookFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield book_model_1.Book.find()
+        const homeBooks = yield book_model_1.Book.find()
             .sort({ createdAt: -1 })
             .limit(6)
-            .populate("refUser");
-        return result;
+            .populate("refUser")
+            .exec(); // Explicitly execute the query
+        return homeBooks;
     }
     catch (error) {
-        throw new Error("Book Not Found");
+        console.error("Error fetching homepage books from DB:", error);
+        throw new Error("Failed to retrieve homepage books.");
     }
 });
-//Get Own book
+// Retrieves all books associated with a specific user.
 const getOwnBookFromDB = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield book_model_1.Book.find({ refUser: userId });
-        return result;
+        const books = yield book_model_1.Book.find({ refUser: userId }).exec(); // Explicitly execute the query
+        return books;
     }
     catch (error) {
-        throw new Error("Book Not Found");
+        console.error("Error fetching user's books from DB:", error);
+        throw new Error("Failed to retrieve user's books.");
     }
 });
-//delete book
+// Deletes a book from the database by its ID.
 const deleteBookFromDB = (productId) => __awaiter(void 0, void 0, void 0, function* () {
-    ///Check user right or wrong
-    // const prvCheck = await Book.findById({ _id: productId });
-    // if (prvCheck?.refUser?.toString() !== loggedUserId) {
-    //   console.log("Book ref id--------: ", prvCheck?.refUser?.toString());
-    //   console.log("logged user id------: ", loggedUserId);
-    //   throw new AppError(401, "You are not authorized");
-    // }
-    //main work
-    const result = yield book_model_1.Book.findByIdAndDelete({ _id: productId });
-    return result;
+    try {
+        const deletedBook = yield book_model_1.Book.findByIdAndDelete(productId).exec(); // Explicitly execute the query
+        return deletedBook;
+    }
+    catch (error) {
+        console.error("Error deleting book from DB:", error);
+        throw new Error("Failed to delete the book.");
+    }
 });
-//Update book
+// Updates a book in the database by its ID.
 const updateBookFromDB = (productId, bookData) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield book_model_1.Book.findByIdAndUpdate({ _id: productId }, bookData, {
-        new: true,
-    });
-    return result;
+    try {
+        const updatedBook = yield book_model_1.Book.findByIdAndUpdate(productId, bookData, {
+            new: true,
+            runValidators: true, // Enforce schema validation during update
+        }).exec(); // Explicitly execute the query
+        return updatedBook;
+    }
+    catch (error) {
+        console.error("Error updating book in DB:", error);
+        throw new Error("Failed to update the book.");
+    }
 });
 exports.BookServices = {
     createBookIntoDB,

@@ -17,67 +17,72 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const AppError_1 = __importDefault(require("../../errors/AppError"));
 const user_model_1 = require("./user.model");
 const config_1 = __importDefault(require("../../config"));
-///Create User into db
-const registerUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("User Payload: ", payload);
-    const email = payload === null || payload === void 0 ? void 0 : payload.email;
-    const res = yield user_model_1.userModel.findOne({ email: email });
-    console.log(" res: ", res);
-    if (res) {
-        throw new AppError_1.default(409, "This Email Allready Exists");
+// Registers a new user in the database
+const createUserInDB = (userData) => __awaiter(void 0, void 0, void 0, function* () {
+    const existingUser = yield user_model_1.userModel.findOne({ email: userData.email });
+    if (existingUser) {
+        throw new AppError_1.default(409, "Email address is already registered");
     }
-    const result = yield user_model_1.userModel.create(payload);
-    return result;
+    const createdUser = yield user_model_1.userModel.create(userData);
+    return createdUser;
 });
-//Get All User from DB
-const getAllUser = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_model_1.userModel.find();
-    return result;
+// Retrieves all users from the database
+const retrieveAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
+    const users = yield user_model_1.userModel.find();
+    return users;
 });
-//deletel User from DB
-const deleteUser = (id) => __awaiter(void 0, void 0, void 0, function* () {
+// Deletes a user from the database based on their ID
+const removeUserFromDB = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield user_model_1.userModel.findOneAndDelete({ _id: id });
-        return result;
+        const deletionResult = yield user_model_1.userModel.findOneAndDelete({ _id: userId });
+        if (!deletionResult) {
+            throw new Error("User not found"); // Ensures the custom error message is used
+        }
+        return deletionResult;
     }
     catch (error) {
-        throw new Error("USer Not Found");
+        throw new AppError_1.default(404, "User not found"); // Changed to AppError
     }
 });
-//Update Password
-const updatePasswordIntoDB = (userId, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const { oldPassword, newPassword } = payload;
-    console.log("User Id: ", userId);
-    console.log("Old Password ", oldPassword);
-    console.log("New  Password ", newPassword);
-    //Checking  if the user is exist
-    const isUserExists = yield user_model_1.userModel.findOne({ _id: userId });
-    if (!isUserExists) {
-        throw new AppError_1.default(404, "User not Found");
+// Updates a user's password in the database
+const changePasswordInDB = (userId, passwordData) => __awaiter(void 0, void 0, void 0, function* () {
+    const { oldPasswordInput, newPasswordInput } = passwordData;
+    const userRecord = yield user_model_1.userModel.findById(userId);
+    if (!userRecord) {
+        throw new AppError_1.default(404, "User account not found");
     }
-    //Check Password is right or wrong
-    const isPasswordMatched = yield bcrypt_1.default.compare(oldPassword, isUserExists === null || isUserExists === void 0 ? void 0 : isUserExists.password);
-    console.log("is Password Matched: ", isPasswordMatched);
-    if (!isPasswordMatched) {
-        throw new AppError_1.default(401, "Old password is not right");
+    const passwordMatch = yield bcrypt_1.default.compare(oldPasswordInput, userRecord.password);
+    if (!passwordMatch) {
+        throw new AppError_1.default(401, "Incorrect old password");
     }
-    const hashNewPassword = yield bcrypt_1.default.hash(newPassword, Number(config_1.default.bcrypt_salt_rounds));
-    const result = yield user_model_1.userModel.findByIdAndUpdate(userId, { password: hashNewPassword }, { new: true });
-    return result;
+    const hashedNewPassword = yield bcrypt_1.default.hash(newPasswordInput, Number(config_1.default.bcrypt_salt_rounds));
+    const updatedUser = yield user_model_1.userModel.findByIdAndUpdate(userId, { password: hashedNewPassword }, { new: true, runValidators: true } // Ensure validation runs during update
+    );
+    return updatedUser;
 });
-//Update User
-const updatUserIntoDB = (userId, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("User Id in service: ", userId);
-    console.log("payload in service", payload);
-    const result = yield user_model_1.userModel.findByIdAndUpdate({ _id: userId }, payload, {
-        new: true,
-    });
-    return result;
+// Updates a user's information in the database
+const modifyUserInDB = (userId, updateData) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const updatedUser = yield user_model_1.userModel.findByIdAndUpdate(userId, updateData, {
+            new: true,
+            runValidators: true, // Ensure validation runs during update
+        });
+        if (!updatedUser) {
+            throw new AppError_1.default(404, "User not found for update"); // Explicitly handle the case where the user is not found
+        }
+        return updatedUser;
+    }
+    catch (error) {
+        if (error.name === "ValidationError") {
+            throw new AppError_1.default(400, "Validation failed: " + error.message);
+        }
+        throw error; //re-throw for generic error handling
+    }
 });
 exports.userServices = {
-    registerUserIntoDB,
-    getAllUser,
-    updatePasswordIntoDB,
-    deleteUser,
-    updatUserIntoDB,
+    registerUserIntoDB: createUserInDB, // aliased
+    getAllUser: retrieveAllUsers, //aliased
+    updatePasswordIntoDB: changePasswordInDB, // aliased
+    deleteUser: removeUserFromDB, // aliased
+    updatUserIntoDB: modifyUserInDB, //aliased
 };

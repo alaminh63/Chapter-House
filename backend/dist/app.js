@@ -23,7 +23,14 @@ app.use(express_1.default.json());
 //Cors integration
 // app.use(cors({ origin: ["*"], credentials: true }));
 app.use((0, cors_1.default)({
-    origin: ["http://localhost:5173", "https://boundless-read.netlify.app"],
+    origin: [
+        "http://localhost:5173",
+        "https://chapter-house-70055.web.app",
+        "https://chapter-house-70055.web.app/",
+        "chapter-house-70055.web.app/",
+        "https://chapter-house-server.vercel.app",
+        "*",
+    ],
     credentials: true,
 }));
 // app.use(cors({ origin: "*", credentials: true }));

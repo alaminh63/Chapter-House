@@ -14,7 +14,14 @@ app.use(express.json());
 // app.use(cors({ origin: ["*"], credentials: true }));
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://chapter-house-70055.web.app"],
+    origin: [
+      "http://localhost:5173",
+      "https://chapter-house-70055.web.app",
+      "https://chapter-house-70055.web.app/",
+      "chapter-house-70055.web.app/",
+      "https://chapter-house-server.vercel.app",
+      "*",
+    ],
     credentials: true,
   })
 );

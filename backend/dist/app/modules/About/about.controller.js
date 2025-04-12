@@ -11,69 +11,67 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.aboutControllers = void 0;
 const about_service_1 = require("./about.service");
-///Add About
-const addAbout = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+// Create About Section
+const createAboutSection = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const aboutData = req.body;
-        const result = yield about_service_1.aboutServices.addAboutIntoDB(aboutData);
+        const sectionData = req.body;
+        const creationResult = yield about_service_1.aboutServices.addAboutIntoDB(sectionData);
         res.status(201).json({
             success: true,
-            message: "About Added successfully",
+            message: "About section created successfully",
             statusCode: 201,
-            data: result,
+            data: creationResult,
         });
     }
     catch (error) {
         next(error);
     }
 });
-//Get All User
-const getAllAbout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Retrieve All About Sections
+const fetchAllAboutSections = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield about_service_1.aboutServices.getAllAbout();
-        res.status(201).json({
+        const sections = yield about_service_1.aboutServices.getAllAbout();
+        res.status(200).json({
+            // Changed to 200 OK
             success: true,
-            message: "About Retrived successfully",
-            statusCode: 201,
-            data: result,
+            message: "About sections retrieved successfully",
+            statusCode: 200,
+            data: sections,
         });
     }
     catch (error) {
-        res.status(400).json({
+        res.status(500).json({
+            // Changed to 500 Internal Server Error
             success: false,
-            message: "Failed to retrive About",
-            statusCode: 400,
+            message: "Failed to retrieve about sections",
+            statusCode: 500,
             error: error,
-            stack: "error stack",
+            stack: "error stack", // Consider removing in production
         });
     }
 });
-//Update About
-const updateAbout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Modify About Section
+const modifyAboutSection = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const id = req.params.id;
-        const about = req.body;
-        // console.log("Come id: ", id);
-        // console.log("Come bhai: ", about);
-        const result = yield about_service_1.aboutServices.updatAboutIntoDB(id, about);
-        //Send Response
+        const sectionId = req.params.id;
+        const updates = req.body;
+        const updateResult = yield about_service_1.aboutServices.updatAboutIntoDB(sectionId, updates);
         res.status(200).json({
-            message: "About updated successfully",
-            status: true,
-            data: result,
+            message: "About section updated successfully",
+            success: true,
+            data: updateResult,
         });
     }
     catch (error) {
-        //Send Response for error
         res.status(500).json({
-            message: "Something went wrong",
-            status: false,
+            message: "Failed to update about section",
+            success: false,
             data: error,
         });
     }
 });
 exports.aboutControllers = {
-    addAbout,
-    getAllAbout,
-    updateAbout,
+    addAbout: createAboutSection, // Aliased
+    getAllAbout: fetchAllAboutSections, // Aliased
+    updateAbout: modifyAboutSection, // Aliased
 };

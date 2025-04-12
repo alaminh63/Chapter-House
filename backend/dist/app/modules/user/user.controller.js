@@ -15,133 +15,117 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userControllers = void 0;
 const user_service_1 = require("./user.service");
 const AppError_1 = __importDefault(require("../../errors/AppError"));
-///Register User
-const registerUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+// Handle User Registration
+const createUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userData = req.body;
-        const result = yield user_service_1.userServices.registerUserIntoDB(userData);
+        const newUserData = req.body;
+        const registrationResult = yield user_service_1.userServices.registerUserIntoDB(newUserData);
         res.status(201).json({
             success: true,
-            message: "User registered successfully",
+            message: "Account successfully created",
             statusCode: 201,
-            data: result,
+            data: registrationResult,
         });
     }
-    catch (error) {
-        // res.status(400).json({
-        //   success: false,
-        //   message: error.message || "Validation error",
-        //   statusCode: 400,
-        //   error: error,
-        //   stack: "error stack",
-        // });
-        next(error);
+    catch (err) {
+        next(err); // Forward error to error handling middleware
     }
 });
-//Get All User
-const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Retrieve All Users
+const fetchAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield user_service_1.userServices.getAllUser();
-        res.status(201).json({
+        const users = yield user_service_1.userServices.getAllUser();
+        res.status(200).json({
             success: true,
-            message: "Users Retrived successfully",
-            statusCode: 201,
-            data: result,
+            message: "User records retrieved successfully",
+            statusCode: 200, // Corrected status code
+            data: users,
         });
     }
     catch (error) {
-        res.status(400).json({
+        res.status(500).json({
+            // More appropriate error code
             success: false,
-            message: "Failed to retrive students",
-            statusCode: 400,
+            message: "Failed to retrieve user records",
+            statusCode: 500,
             error: error,
-            stack: "error stack",
+            stack: "error stack", // Consider removing in production for security
         });
     }
 });
-//delete  User
-const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Remove a User
+const removeUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const id = (_a = req === null || req === void 0 ? void 0 : req.params) === null || _a === void 0 ? void 0 : _a.id;
-        const result = yield user_service_1.userServices.deleteUser(id);
-        res.status(201).json({
+        const userId = (_a = req === null || req === void 0 ? void 0 : req.params) === null || _a === void 0 ? void 0 : _a.id;
+        const deletionResult = yield user_service_1.userServices.deleteUser(userId);
+        res.status(200).json({
             success: true,
-            message: "Users Deleted successfully",
-            statusCode: 201,
-            data: result,
+            message: "User successfully removed",
+            statusCode: 200,
+            data: deletionResult,
         });
     }
     catch (error) {
-        res.status(400).json({
+        res.status(500).json({
             success: false,
-            message: "Failed to retrive students",
-            statusCode: 400,
+            message: "Failed to remove user",
+            statusCode: 500,
             error: error,
             stack: "error stack",
         });
     }
 });
-//Update  User
-const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Modify User Information
+const modifyUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const id = (_a = req === null || req === void 0 ? void 0 : req.params) === null || _a === void 0 ? void 0 : _a.id;
-        const body = req === null || req === void 0 ? void 0 : req.body;
-        console.log("Come id: ", id);
-        console.log("Body ", body);
-        const result = yield user_service_1.userServices.updatUserIntoDB(id, body);
-        res.status(201).json({
+        const userId = (_a = req === null || req === void 0 ? void 0 : req.params) === null || _a === void 0 ? void 0 : _a.id;
+        const updateData = req === null || req === void 0 ? void 0 : req.body;
+        const updateResult = yield user_service_1.userServices.updatUserIntoDB(userId, updateData);
+        res.status(200).json({
             success: true,
-            message: "Users Updated successfully",
-            statusCode: 201,
-            data: result,
+            message: "User information updated successfully",
+            statusCode: 200,
+            data: updateResult,
         });
     }
     catch (error) {
-        res.status(400).json({
+        res.status(500).json({
             success: false,
-            message: "Failed to retrive students",
-            statusCode: 400,
+            message: "Failed to update user information",
+            statusCode: 500,
             error: error,
             stack: "error stack",
         });
     }
 });
-///Update Password
-const updatePassword = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c;
+// Change User Password
+const changePassword = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     try {
-        const userId = (_a = req === null || req === void 0 ? void 0 : req.params) === null || _a === void 0 ? void 0 : _a.userId;
-        const userPassword = req.body;
-        console.log("Logged user id : ", (_b = req === null || req === void 0 ? void 0 : req.user) === null || _b === void 0 ? void 0 : _b._id);
-        console.log("come user id: ", userId);
-        if (((_c = req === null || req === void 0 ? void 0 : req.user) === null || _c === void 0 ? void 0 : _c._id) !== userId) {
-            throw new AppError_1.default(403, "You are not authorized");
+        const userIdFromParams = (_a = req === null || req === void 0 ? void 0 : req.params) === null || _a === void 0 ? void 0 : _a.userId;
+        const passwordData = req.body;
+        // Authentication check
+        if (((_b = req === null || req === void 0 ? void 0 : req.user) === null || _b === void 0 ? void 0 : _b._id) !== userIdFromParams) {
+            throw new AppError_1.default(403, "Unauthorized access");
         }
-        const result = yield user_service_1.userServices.updatePasswordIntoDB(userId, userPassword);
-        res.status(201).json({
+        const passwordUpdateResult = yield user_service_1.userServices.updatePasswordIntoDB(userIdFromParams, passwordData);
+        res.status(200).json({
             success: true,
-            message: "Password Updated Successfully",
-            statusCode: 201,
-            data: result,
+            message: "Password changed successfully",
+            statusCode: 200,
+            data: passwordUpdateResult,
         });
     }
-    catch (error) {
-        // res.status(400).json({
-        //   success: false,
-        //   message: error.message || "Validation error",
-        //   statusCode: 400,
-        //   error: error,
-        //   stack: "error stack",
-        // });
-        next(error);
+    catch (err) {
+        next(err);
     }
 });
 exports.userControllers = {
-    registerUser,
-    getAllUsers,
-    deleteUser,
-    updatePassword,
-    updateUser,
+    registerUser: createUser, //Renamed
+    getAllUsers: fetchAllUsers, //Renamed
+    deleteUser: removeUser, //Renamed
+    updatePassword: changePassword, //Renamed
+    updateUser: modifyUser, //Renamed
 };
