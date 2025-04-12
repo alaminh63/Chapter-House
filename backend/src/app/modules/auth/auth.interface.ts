@@ -1,4 +1,4 @@
-export interface ILogin {
+export type TLoginUser = {
   email: string;
   password: string;
-}
+};

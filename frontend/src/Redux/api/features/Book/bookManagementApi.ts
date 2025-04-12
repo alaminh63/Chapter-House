@@ -15,7 +15,7 @@ const userManagementApi = baseApi.injectEndpoints({
     getAllBookByAdmin: builder.query({
       query: () => {
         return {
-          url: `/books/admin/getbook`,
+          url: `/products/admin/getbook`,
           method: "GET",
         };
       },
@@ -25,7 +25,7 @@ const userManagementApi = baseApi.injectEndpoints({
       query: (params) => {
         const queryString = new URLSearchParams(params).toString();
         return {
-          url: `/books?${queryString}`,
+          url: `/products?${queryString}`,
           method: "GET",
         };
       },
@@ -34,7 +34,7 @@ const userManagementApi = baseApi.injectEndpoints({
     getSingleBook: builder.query({
       query: (id) => {
         return {
-          url: `/books/${id}`,
+          url: `/products/${id}`,
           method: "GET",
         };
       },

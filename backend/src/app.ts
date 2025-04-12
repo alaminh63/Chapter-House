@@ -1,39 +1,38 @@
-import express, { Application, Request, Response } from 'express';
-
-import cors from 'cors';
-
-import router from './routes';
-import globalErrorHandler from './app/middlewares/globalErrorHandler';
-import notFound from './app/middlewares/notFound';
-
+import express, { Application, Request, Response } from "express";
+import cors from "cors";
+import { BookRoutes } from "./app/modules/book/book.route";
+import { OrderRoutes } from "./app/modules/order/order.route";
+import router from "./app/routes";
+import globalErrorHandler from "./app/middleware/globalErrorHandler";
+import notFound from "./app/middleware/notFound";
 const app: Application = express();
 
-// CORS
-//SHOULD HAVE TO CHANGE THE ORIGIN WHEN PRODUCTION!
-app.use(
-  cors({
-    origin: ['http://localhost:5173'],
-    credentials: true,
-  }),
-);
-
-// 3rd PARTY MIDDLEWARE
-
-
-// BODY PARSER
+//Parser
 app.use(express.json());
 
-// ROUTER
-app.use('/api/v1', router);
+//Cors integration
+// app.use(cors({ origin: ["*"], credentials: true }));
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://boundless-read.netlify.app"],
+    credentials: true,
+  })
+);
+// app.use(cors({ origin: "*", credentials: true }));
 
-// HELLO RESPONSE
-app.get('/', (req: Request, res: Response) => {
-  res.status(200).json({ message: 'Hello World! 👋' });
-});
+//application route
+// app.use("/api/products", BookRoutes);
+// app.use("/api", OrderRoutes);
+app.use("/api", router);
 
-// GLOBAL ERROR HANDLER
+const getAController = async (req: Request, res: Response) => {
+  res.send("Book Shop Back end Assignment-4");
+};
+app.get("/", getAController);
+
+//Global Error Handler
 app.use(globalErrorHandler);
-
-// NOT FOUND
+//Not Found Route
 app.use(notFound);
+
 export default app;

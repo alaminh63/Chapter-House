@@ -1,41 +1,11 @@
-import React from "react";
 import { useNavigate, useParams } from "react-router";
 import { useGetSingleBookQuery } from "../../Redux/api/features/Book/bookManagementApi";
 import LoadingPage from "../../component/LoadingPage/LoadingPage";
+// import { useAddCartMutation } from "../../Redux/api/features/Cart/cartManagementApi";
 import { toast } from "sonner";
 import { useAppSelector } from "../../Redux/hooks";
 import { sonarId } from "../../utils/Fucntion/sonarId";
 import { useTitle } from "../../component/hook/useTitle";
-import {
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  CardMedia,
-  Typography,
-  Button,
-  Chip,
-  Box,
-  Rating,
-  Divider,
-} from "@mui/material";
-import { styled } from "@mui/material/styles";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import InfoIcon from "@mui/icons-material/Info";
-import StarIcon from "@mui/icons-material/Star";
-import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import InventoryIcon from "@mui/icons-material/Inventory";
-import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
-
-const StyledCardMedia = styled(CardMedia)({
-  height: 500,
-  objectFit: "cover",
-  borderRadius: "12px",
-  transition: "transform 0.3s ease-in-out",
-  "&:hover": {
-    transform: "scale(1.05)",
-  },
-});
 
 const BookDetail = () => {
   useTitle("Book Detail");
@@ -43,9 +13,11 @@ const BookDetail = () => {
   const { user } = useAppSelector((state) => state.auth);
 
   const { _id } = useParams();
+  //   console.log("The book ID is: ", _id);
 
   const { data, isLoading } = useGetSingleBookQuery(_id);
   const book = data?.data;
+  console.log("Book: ", book);
 
   const navigate = useNavigate();
 
@@ -59,98 +31,106 @@ const BookDetail = () => {
       return;
     }
     if (user && user?.role === "admin") {
-      toast.error("You can't order as admin", { id: sonarId });
+      toast.error("You can to order as admin", { id: sonarId });
       return;
     }
 
+    // naviagate(`/user-checkout/${_id}`);
     navigate(`/user-checkout/${_id}`);
   };
-
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Card elevation={5} sx={{ borderRadius: "16px" }}>
-        <CardContent>
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={6}>
-              <StyledCardMedia image={book?.imageUrl} title={book?.title} />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-                <Typography variant="h4" component="h2" fontWeight="bold">
-                  {book?.title}
-                </Typography>
-                <Chip label={book?.category} color="secondary" icon={<InfoIcon />} />
-              </Box>
+    <div>
+      <h1 className="bg-[#5C3485] p-4 mb-2 rounded-md font-bold text-center text-xl">
+        Book Detail
+      </h1>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-800 to-blue-900 text-white flex justify-center items-center px-6 py-12">
+        <div className="max-w-5xl w-full bg-white bg-opacity-10 backdrop-blur-lg p-10 rounded-2xl shadow-2xl border border-white/20">
+          {/* Flex Container */}
+          <div className="flex flex-col md:flex-row items-center space-y-8 md:space-y-0 md:space-x-10">
+            {/* Book Image */}
+            <div className="w-64 h-96 relative">
+              <img
+                src={book?.imageUrl}
+                alt={book?.title}
+                className="w-full h-full object-cover rounded-lg shadow-lg border-4 border-white/20"
+              />
+              <span className="absolute top-2 left-2 bg-blue-600 px-3 py-1 text-xs font-bold rounded-full shadow-md">
+                {book?.category}
+              </span>
+            </div>
 
-              <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                <Rating name="book-rating" value={4.5} precision={0.5} readOnly icon={<StarIcon fontSize="medium" />} />
-                <Typography variant="body2" color="text.secondary" ml={1}>
-                  (4.5/5)
-                </Typography>
-              </Box>
+            {/* Book Details */}
+            <div className="flex-1">
+              <h1 className="text-4xl font-extrabold">{book?.title}</h1>
+              <p className="text-lg text-gray-300 mt-2">{book?.description}</p>
 
-              <Typography variant="subtitle1" color="textSecondary" sx={{ mb: 2 }}>
-                {book?.description}
-              </Typography>
+              {/* Price & Stock */}
+              <div className="mt-4 flex items-center space-x-6">
+                <span className="text-2xl font-bold text-green-400">
+                  ${book?.price?.toFixed(2)}
+                </span>
+                <span
+                  className={`text-lg font-semibold px-3 py-1 rounded-lg ${
+                    book?.inStock ? "bg-green-500" : "bg-red-500"
+                  }`}
+                >
+                  {book?.inStock ? "In Stock" : "Out of Stock"}
+                </span>
+              </div>
 
-              <Divider sx={{ mb: 2 }} />
+              {/* Additional Info */}
+              <div className="mt-6 grid grid-cols-2 gap-4">
+                <div>
+                  <span className="font-semibold text-gray-200">Author:</span>
+                  <p className="text-gray-300">{book?.author}</p>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-200">Brand:</span>
+                  <p className="text-gray-300">{book?.brand}</p>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-200">Model:</span>
+                  <p className="text-gray-300">{book?.model}</p>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-200">
+                    Quantity Available:
+                  </span>
+                  <p className="text-gray-300">{book?.quantity}</p>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-200">
+                    Published:
+                  </span>
+                  <p className="text-gray-300">
+                    {new Date(book?.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
 
-              <Box sx={{ mb: 2 }}>
-                <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                  <LocalOfferIcon color="primary" sx={{ mr: 1 }} />
-                  <Typography variant="h6" color="primary" fontWeight="bold">
-                    ${book?.price?.toFixed(2)}
-                  </Typography>
-                </Box>
-
-                <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                  <VerifiedUserIcon color="success" sx={{ mr: 1 }} />
-                  <Typography variant="body1">
-                    Author: <Typography variant="subtitle2" component="span">{book?.author}</Typography>
-                  </Typography>
-                </Box>
-
-                <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                  <InventoryIcon color="info" sx={{ mr: 1 }} />
-                  <Typography variant="body1">
-                    Quantity Available: <Typography variant="subtitle2" component="span">{book?.quantity}</Typography>
-                  </Typography>
-                </Box>
-
-                <Typography variant="caption">
-                  Published: {new Date(book?.createdAt).toLocaleDateString()}
-                </Typography>
-              </Box>
-
-              <Box>
+              {/* Order Button */}
+              <div className="mt-6">
                 {book?.inStock ? (
-                  <Button
-                    variant="contained"
-                    color="success"
-                    size="large"
-                    startIcon={<ShoppingCartIcon />}
+                  <button
+                    className="px-6 py-3 text-lg font-semibold text-white bg-indigo-600 rounded-lg shadow-md hover:bg-indigo-700 transition duration-300"
                     onClick={handleOrder}
-                    sx={{
-                      ":hover": {
-                        backgroundColor: "green",
-                        transform: "scale(1.05)",
-                      },
-                      transition: "transform 0.3s ease-in-out",
-                    }}
                   >
                     Order Now
-                  </Button>
+                  </button>
                 ) : (
-                  <Button variant="outlined" color="error" size="large" disabled>
+                  <button
+                    className="px-6 py-3 text-lg font-semibold text-white bg-gray-600 rounded-lg shadow-md cursor-not-allowed"
+                    disabled
+                  >
                     Out of Stock
-                  </Button>
+                  </button>
                 )}
-              </Box>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
-    </Container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
