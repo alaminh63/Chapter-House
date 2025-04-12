@@ -82,6 +82,7 @@ This project leverages a modern tech stack to deliver a seamless and robust user
 ## 🚀 Getting Started
 
 1.  **Clone the repository:** `git clone [repository URL]`
+3.  **Change directory frontend and backend** cd frontend - cd backend
 2.  **Install dependencies:** `npm install` or `yarn install`
 3.  **Start the development server:** `npm run dev` or `yarn dev`
 
