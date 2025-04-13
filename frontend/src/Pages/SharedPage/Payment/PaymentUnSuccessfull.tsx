@@ -6,7 +6,7 @@ const PaymentUnSuccessfull = () => {
   const { transactionId } = useParams();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-red-600 to-red-900 flex items-center justify-center text-white">
+    <div className="min-h-screen  flex items-center justify-center text-white">
       <div className="text-center p-8 bg-white/10 rounded-2xl shadow-lg backdrop-blur-md max-w-md">
         <h1 className="text-3xl font-bold mb-4">❌ Payment Failed!</h1>
         <p className="text-lg mb-6">

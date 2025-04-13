@@ -26,9 +26,6 @@ const getAllBookByAdmin = async (): Promise<TBook[]> => {
   return books;
 };
 
-// Retrieves books from the database based on provided query parameters.
-import { SortOrder } from "mongoose"; // Import SortOrder from mongoose
-
 export const getAllBooksFromDB = async (
   queryParams: BookQueryParams
 ): Promise<{
@@ -98,7 +95,8 @@ export const getAllBooksFromDB = async (
     const sortOptions: Record<string, SortOrder> = {};
     if (sortBy && sortOrder) {
       // Ensure both sortBy and sortOrder are present
-      sortOptions[sortBy] = sortOrder === "desc" ? "desc" : "asc"; // Explicitly handle 'desc' and default to 'asc'
+      sortOptions[sortBy] =
+        (sortOrder as unknown as string) === "desc" ? "desc" : "asc";
     }
 
     const books = await Book.find(query)

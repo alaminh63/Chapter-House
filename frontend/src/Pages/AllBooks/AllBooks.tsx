@@ -45,7 +45,7 @@ const AllBooks = () => {
     toast.error("Error while fetching books");
   }
 
-  const [addCart, { isLoading: isAddingToCart }] = useAddCartMutation();
+  const [addCart,] = useAddCartMutation();
 
   const books = bookData?.data || [];
   const totalPages = bookData?.pagination?.totalPages || 1;
@@ -80,10 +80,10 @@ const AllBooks = () => {
       const res = await addCart(cleanData).unwrap;
       console.log('res: ', res);
 
-      if (res?.success) {
 
-        toast.success("Book added to cart");
-      }
+
+      toast.success("Book added to cart");
+
     } catch (error) {
       toast.error("Failed to add book to cart");
     }

@@ -56,7 +56,7 @@ export const initiatePayment = async (
       tran_id: transactionId, // use unique tran_id for each api call
       success_url: `${config.payment_url}/api/payment/success/${transactionId}?productId=${productId}&quantity=${quantity}&userId=${userId}`,
       fail_url: `${config.payment_url}/api/payment/fail/${transactionId}`,
-      cancel_url: "http://localhost:3030/cancel",
+      cancel_url: `${config.payment_url}/api/payment/fail/${transactionId}`,
       ipn_url: "http://localhost:3030/ipn",
       shipping_method: "Courier",
       product_name: "Computer.",
@@ -156,11 +156,11 @@ export const paymentSuccess = async (req: Request, res: Response) => {
   );
   //   console.log("After Update Result is: ", result);
   if (result?.modifiedCount > 0) {
-    res.redirect(
-      `${process.env.FRONTEND_URL}/success-pay/${transactionId}`
-    );
+    res.redirect(`${process.env.FRONTEND_URL}/success-pay/${transactionId}`);
   }
 };
+
+
 
 /**
  * Handle Payment Unsuccess---------------------------------------------------------------------------------------
@@ -173,9 +173,7 @@ export const paymentUnSuccess = async (req: Request, res: Response) => {
   const result = await paymentModel.deleteOne({ transactionId: transactionId });
   console.log("After Delete Result is: ", result);
   if (result?.deletedCount) {
-    res.redirect(
-      `${process.env.FRONTEND_URL}/unsuccess-pay/${transactionId}`
-    );
+    res.redirect(`${process.env.FRONTEND_URL}/unsuccess-pay/${transactionId}`);
   }
 };
 

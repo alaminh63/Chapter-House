@@ -3,7 +3,7 @@ import TestimonialCard from "./TestimonialCard/TestimonialCard";
 import SectionTitle from "../../SharedPage/SectionTitle/SectionTitle";
 
 const Testimonial = () => {
-  const [testimonials, setTestimonials] = useState<TReview[]>([]);
+  const [testimonials, setTestimonials] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Fetch testimonials
@@ -48,11 +48,11 @@ const Testimonial = () => {
   return (
     <section className=" py-16">
       <div className="container mx-auto px-4 text-center">
-       
+
         <SectionTitle
-        subHeading={"Explore feedback from our  clients"}
-        heading={" What Our Customers Say"}
-      />
+          subHeading={"Explore feedback from our  clients"}
+          heading={" What Our Customers Say"}
+        />
         {testimonials.length > 0 ? (
           <div className="relative">
             <div className="overflow-hidden">

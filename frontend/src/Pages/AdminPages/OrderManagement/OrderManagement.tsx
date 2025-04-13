@@ -1,55 +1,55 @@
 import { useTitle } from "../../../component/hook/useTitle";
 import { useGetAdminOrderQuery } from "../../../Redux/api/features/Payment/paymenManagementApi";
-
 import LoadingPage from "../../../component/LoadingPage/LoadingPage";
 import BlankPage from "../../../component/BlankPage/BlankPage";
-
 import OrderManagementTable from "./OrderManagementTable";
 
 const OrderManagement = () => {
   useTitle("Order Management");
-
   const { data, isLoading } = useGetAdminOrderQuery(undefined);
   const orders = data?.data;
-  // console.log("Orders: ", orders);
 
   if (isLoading) {
     return <LoadingPage />;
   }
-  if (orders?.length == 0) {
-    return <BlankPage data=" There are no order" />;
+
+  if (!orders?.length) {
+    return <BlankPage data="There are no orders" />;
   }
 
   return (
-    <div>
-      <h1 className="text-xl font-bold mb-4">Order Management by Admin</h1>
-      <div className="overflow-x-auto bg-gray-800 rounded-lg shadow-lg p-0 md:p-6">
-        <table className="w-full text-sm">
-          {/* head */}
-          <thead>
-            <tr className="bg-teal-500">
-              <th className="py-3 px-4 text-left">X</th>
-              <th className="py-3 px-4 text-left">Book Image</th>
-              <th className="py-3 px-4 text-left">Book Name</th>
-              <th className="py-3 px-4 text-left">Book Author</th>
-              <th className="py-3 px-4 text-left">Book Category</th>
-              <th className="py-3 px-4 text-left">Quantity</th>
-              <th className="py-3 px-4 text-left">Price</th>
-              <th className="py-3 px-4 text-left">Transaction id</th>
-              <th className="py-3 px-4 text-left">Date</th>
-              <th className="py-3 px-4 text-left">User Name</th>
-              <th className="py-3 px-4 text-left">User Email</th>
-              <th className="py-3 px-4 text-left">Admin Approval</th>
-              <th className="py-3 px-4 text-left">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {orders?.map((data: any, idx: number) => (
-              <OrderManagementTable key={idx} data={data} idx={idx} />
-            ))}
-          </tbody>
-        </table>
+    <div className="  text-white ">
+      <div className="container mx-auto px-4  l">
+        <h1 className="text-2xl font-semibold text-white mb-6">
+          Order Management
+        </h1>
+        <div className="overflow-x-auto bg-gray-800 rounded-lg shadow-md">
+          <table className="w-full text-xs">
+            {/* Head */}
+            <thead>
+              <tr className="bg-blue-600 text-white">
+                <th className="py-2 px-3 text-left">#</th>
+                <th className="py-2 px-3 text-left">Image</th>
+                <th className="py-2 px-3 text-left">Book Name</th>
+                <th className="py-2 px-3 text-left">Author</th>
+                <th className="py-2 px-3 text-left">Category</th>
+                <th className="py-2 px-3 text-left">Quantity</th>
+                <th className="py-2 px-3 text-left">Price</th>
+                <th className="py-2 px-3 text-left">Transaction ID</th>
+                <th className="py-2 px-3 text-left">Date</th>
+                <th className="py-2 px-3 text-left">User Name</th>
+                <th className="py-2 px-3 text-left">User Email</th>
+                <th className="py-2 px-3 text-left">Approval</th>
+                <th className="py-2 px-3 text-left">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders?.map((data: any, idx: number) => (
+                <OrderManagementTable key={data._id || idx} data={data} idx={idx + 1} />
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

@@ -8,14 +8,14 @@ const DashboradButton = () => {
   // console.log("Role: ", role);
   return (
     <div>
-
-      <div
-        tabIndex={0}
-        role="button"
-        className="btn text-white  bg-[#19CB7C] hover:bg-slate-600 border-none"
-      >      <Link to={`/${role}-dashboard`}>Dashboard</Link>
-
-      </div>
+      <Link to={`/${role}-dashboard`}>
+        <div
+          tabIndex={0}
+          role="button"
+          className="btn text-white  bg-[#19CB7C] hover:bg-slate-600 border-none"
+        >    Dashboard
+        </div>
+      </Link>
 
 
     </div>

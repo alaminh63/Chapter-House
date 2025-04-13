@@ -79,7 +79,8 @@ const getAllBooksFromDB = (queryParams) => __awaiter(void 0, void 0, void 0, fun
         const sortOptions = {};
         if (sortBy && sortOrder) {
             // Ensure both sortBy and sortOrder are present
-            sortOptions[sortBy] = sortOrder === "desc" ? "desc" : "asc"; // Explicitly handle 'desc' and default to 'asc'
+            sortOptions[sortBy] =
+                sortOrder === "desc" ? "desc" : "asc";
         }
         const books = yield book_model_1.Book.find(query)
             .sort(sortOptions)

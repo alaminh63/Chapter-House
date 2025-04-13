@@ -55,7 +55,7 @@ const initiatePayment = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
             tran_id: transactionId, // use unique tran_id for each api call
             success_url: `${config_1.default.payment_url}/api/payment/success/${transactionId}?productId=${productId}&quantity=${quantity}&userId=${userId}`,
             fail_url: `${config_1.default.payment_url}/api/payment/fail/${transactionId}`,
-            cancel_url: "http://localhost:3030/cancel",
+            cancel_url: `${config_1.default.payment_url}/api/payment/fail/${transactionId}`,
             ipn_url: "http://localhost:3030/ipn",
             shipping_method: "Courier",
             product_name: "Computer.",

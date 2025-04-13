@@ -71,7 +71,7 @@ const MyCart = () => {
           <div className="text-center py-16 bg-gray-700 rounded-xl shadow-sm">
             <p className="text-xl font-medium text-gray-300">Your cart is empty!</p>
             <a
-              href="/shop"
+              href="/all-books"
               className="mt-4 inline-flex items-center px-5 py-2.5 bg-indigo-500 text-white text-sm font-medium rounded-lg shadow-md hover:bg-indigo-600 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-gray-800"
               aria-label="Browse Shop"
             >

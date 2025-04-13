@@ -19,7 +19,7 @@ const BookContent = ({ book }: IProps) => {
     title,
     model,
   } = book;
-  const byUser: any = book?.refUser;
+  
 
   return (
     <div className="w-full md:w-80 p-4 mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-50">

@@ -7,17 +7,18 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import logo from "../../../assets/Logo/Logo.png";
 
 const Footer = () => {
+  const url = "facebook.com/ChapterHouse";
   const handleWhatsapp = () => {
-    const whatsappUrl = `https://wa.me/8801518748081`;
+    const whatsappUrl = `https://wa.me/8801775006662`;
     window.open(whatsappUrl, "_blank");
   };
 
-  const phoneNumber = "+880 1951912997";
+  const phoneNumber = "+8801775006662";
   const handlePhoneCall = () => {
     window.location.href = `tel:${phoneNumber}`;
   };
 
-  const emailAddress = "suvrodeb.cse@gmail.com";
+  const emailAddress = "chapterhouse@gmail.com";
   const handleEmail = () => {
     window.location.href = `mailto:${emailAddress}`;
   };
@@ -38,7 +39,7 @@ const Footer = () => {
               { Icon: InstagramIcon, url: "" },
               { Icon: LinkedInIcon, url: "" },
               { Icon: WhatsAppIcon, onClick: handleWhatsapp },
-            ].map(({ Icon, url, onClick }, index) => (
+            ].map(({ Icon, onClick }, index) => (
               <Link
                 key={index}
                 to={url}

@@ -13,95 +13,103 @@ import { useTitle } from "../../component/hook/useTitle";
 const imageHostingUrl =
   "https://api.cloudinary.com/v1_1/dixfkupof/image/upload";
 
+interface FormValues {
+  title: string;
+  author: string;
+  brand: string;
+  model: string;
+  price: number;
+  description: string;
+  quantity: number;
+  category: string;
+  image: File | null;
+}
+
 const AddBook = () => {
   useTitle("Add Book");
   const [addBook] = useAddBookMutation();
   const imageRef = useRef<HTMLInputElement | null>(null);
   const { user } = useAppSelector((state) => state.auth);
-  //   console.log("User in Add Book: ", user);
-  const [category, setCategory] = useState("");
-  const handleCategory = (e: ChangeEvent<HTMLSelectElement>) => {
-    const data = e.target.value;
-    setCategory(data);
-    // console.log("Data: ", data);
+
+  const [formValues, setFormValues] = useState<FormValues>({
+    title: "",
+    author: "",
+    brand: "",
+    model: "",
+    price: 0,
+    description: "",
+    quantity: 0,
+    category: "",
+    image: null,
+  });
+
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormValues(prev => ({ ...prev, [name]: value }));
   };
 
-  //in Stock
-  let inStock;
 
-  ///Handle Image
+  const handleCategoryChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setFormValues(prev => ({ ...prev, category: e.target.value }));
+  };
+
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      setFormValues(prev => ({ ...prev, image: file }));
+      const imageUrl = URL.createObjectURL(file);
+      setPreviewImage(imageUrl);
+    } else {
+      setFormValues(prev => ({ ...prev, image: null }));
+      setPreviewImage(null);
+    }
+  };
 
   const uploadImage = () => {
-    console.log("Upload Image");
     if (imageRef.current) {
       imageRef.current.click();
     }
   };
 
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    console.log("File selected: ", file); // Debugging
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setPreviewImage(imageUrl);
-    } else {
-      setPreviewImage(null);
-    }
-  };
-  // console.log("Image Preview: ", previewImage);
-
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const Form = event.target as HTMLFormElement;
-    const title = Form.titlee.value;
-    const author = Form.author.value;
-    const brand = Form.brand.value;
-    const model = Form.model.value;
-    const price = parseFloat(Form.price.value);
-    const description = Form.description.value;
-    const quantity = parseInt(Form.quantity.value);
-    const fileInput = Form.image.files[0];
-    if (quantity > 0) {
-      inStock = true;
-    } else {
-      inStock = false;
-    }
+    const { title, author, brand, model, price, description, quantity, category, image } = formValues;
+
+
     if (!category) {
       toast.error("Category field is empty", { id: sonarId });
+      return;
     }
 
-    if (!fileInput) {
+    if (!image) {
       toast.error("Please select an image", { id: sonarId });
       return;
     }
-    // console.log("File input: ", fileInput);
 
-    // Create FormData and append the file
+
+    let inStock = quantity > 0;
+
+
     const formData = new FormData();
-    formData.append("file", fileInput);
+    formData.append("file", image);
     formData.append("upload_preset", "suvrodeb");
     formData.append("cloud_name", "dixfkupof");
-    console.log("Selected File:", fileInput);
+
 
     try {
       toast.loading("Inserting Book", { id: sonarId });
-      // Upload the image using Axios
-      // const response = await axios.post(imageHostingUrl, formData);
 
-      // console.log("Image Upload response: ", response);
       const imageResponse = await axios.post(imageHostingUrl, formData);
 
-      // console.log("Uploaded image URL:", res?.data?.url);
-
       if (imageResponse?.data?.url) {
-        const imageUrl = imageResponse?.data?.url; // Get the image URL
-        console.log("Image uploaded successfully:", imageUrl);
-        // toast.success("Image Upload successfully", { id: sonarId });
+        const imageUrl = imageResponse?.data?.url;
 
-        ///Send Data in Back end
-        const formData = {
+        const bookData = {
           title,
           author,
           brand,
@@ -114,12 +122,25 @@ const AddBook = () => {
           inStock,
           refUser: user?._id,
         };
-        // console.log("Form Data: ", formData);
-        toast.loading("Inserting Book", { id: sonarId });
-        const res = await addBook(formData).unwrap();
-        console.log("Res: ", res);
+
+
+        const res = await addBook(bookData).unwrap();
+
         if (res?.success) {
           toast.success(res?.message, { id: sonarId });
+          // Optionally reset the form after successful submission
+          setFormValues({
+            title: "",
+            author: "",
+            brand: "",
+            model: "",
+            price: 0,
+            description: "",
+            quantity: 0,
+            category: "",
+            image: null,
+          });
+          setPreviewImage(null);
         }
       } else {
         console.error("Image upload failed:", imageResponse);
@@ -145,11 +166,11 @@ const AddBook = () => {
                 <img
                   src={previewImage}
                   alt="Preview"
-                  className="w-48 h-48 object-cover rounded-lg shadow-lg cursor-pointer"
+                  className="w-24 h-24 object-cover rounded-lg shadow-lg cursor-pointer"
                   onClick={uploadImage}
                 />
                 <CreateIcon
-                  className="absolute top-2 right-2 text-white cursor-pointer"
+                  className="absolute top-0 -right-8 text-white cursor-pointer"
                   onClick={uploadImage}
                 />
               </div>
@@ -158,11 +179,11 @@ const AddBook = () => {
                 <img
                   src={bookImage}
                   alt="Default"
-                  className="w-48 h-48 object-cover rounded-lg shadow-lg cursor-pointer"
+                  className="w-24 h-24 object-cover rounded-lg shadow-lg cursor-pointer"
                   onClick={uploadImage}
                 />
                 <CreateIcon
-                  className="absolute top-2 right-2 text-white cursor-pointer"
+                  className="absolute top-0 -right-8 text-white cursor-pointer"
                   onClick={uploadImage}
                 />
               </div>
@@ -174,7 +195,9 @@ const AddBook = () => {
                 <label className="block mb-2 text-sm font-medium">Title</label>
                 <input
                   type="text"
-                  name="titlee"
+                  name="title"
+                  value={formValues.title}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring focus:ring-teal-500"
                 />
@@ -184,6 +207,8 @@ const AddBook = () => {
                 <input
                   type="text"
                   name="author"
+                  value={formValues.author}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring focus:ring-teal-500"
                 />
@@ -195,6 +220,8 @@ const AddBook = () => {
                 <input
                   type="text"
                   name="brand"
+                  value={formValues.brand}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring focus:ring-teal-500"
                 />
@@ -204,6 +231,8 @@ const AddBook = () => {
                 <input
                   type="text"
                   name="model"
+                  value={formValues.model}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring focus:ring-teal-500"
                 />
@@ -215,6 +244,8 @@ const AddBook = () => {
                 <input
                   type="number"
                   name="price"
+                  value={formValues.price}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring focus:ring-teal-500 removeDefaultIcon"
                 />
@@ -225,8 +256,8 @@ const AddBook = () => {
                 </label>
                 <select
                   name="category"
-                  value={category}
-                  onChange={handleCategory}
+                  value={formValues.category}
+                  onChange={handleCategoryChange}
                   required
                   className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring focus:ring-teal-500"
                 >
@@ -247,6 +278,8 @@ const AddBook = () => {
               </label>
               <textarea
                 name="description"
+                value={formValues.description}
+                onChange={handleInputChange}
                 rows={4}
                 required
                 className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring focus:ring-teal-500"
@@ -257,6 +290,8 @@ const AddBook = () => {
               <input
                 type="number"
                 name="quantity"
+                value={formValues.quantity}
+                onChange={handleInputChange}
                 required
                 className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring focus:ring-teal-500 removeDefaultIcon"
               />
